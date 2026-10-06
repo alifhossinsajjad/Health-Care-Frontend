@@ -1,6 +1,6 @@
 import React from 'react'
 
-export const PatientDashboard = () => {
+export default function PatientDashboard() {
   return (
     <div>PatientDashboard</div>
   )
