@@ -2,7 +2,8 @@ import { configureStore } from '@reduxjs/toolkit';
 
 export const store = configureStore({
   reducer: {
-    
+    // Placeholder reducer to prevent Redux initialization crash
+    app: (state = {}) => state,
   },
   devTools: process.env.NODE_ENV !== 'production',
 });

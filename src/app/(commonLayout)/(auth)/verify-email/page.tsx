@@ -1,7 +1,12 @@
-import React from 'react'
+import VerifyEmailForm from "@/src/components/modules/auth/verifyEmailForm";
+import React, { Suspense } from "react";
 
-export const VerifyEmailPage = () => {
+export default function VerifyEmailPage() {
   return (
-    <div>VerifyEmailPage</div>
-  )
+    <div className="flex min-h-screen items-center justify-center">
+      <Suspense fallback={<div>Loading...</div>}>
+        <VerifyEmailForm />
+      </Suspense>
+    </div>
+  );
 }

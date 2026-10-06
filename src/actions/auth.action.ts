@@ -1,6 +1,12 @@
 "use server";
 
-import { ILoginPayload, loginZodSchema } from "@/src/zod/auth.validation";
+import { 
+  ILoginPayload, loginZodSchema,
+  IRegisterPayload, registerZodSchema,
+  IVerifyEmailPayload, verifyEmailZodSchema,
+  IForgotPasswordPayload, forgotPasswordZodSchema,
+  IResetPasswordPayload, resetPasswordZodSchema
+} from "@/src/zod/auth.validation";
 import { setTokenInCookies } from "@/src/utils/token";
 
 import { API_BASE_URL } from "@/src/lib/axiosInstance";
@@ -61,5 +67,140 @@ export const loginAction = async (payload: ILoginPayload) => {
     console.error("Login Server Action Error:", error);
     const errorMessage = error instanceof Error ? error.message : "Internal server error during login";
     return { success: false, message: errorMessage };
+  }
+};
+
+// ==========================================
+// 2. Patient Register Action
+// ==========================================
+export const registerAction = async (payload: IRegisterPayload) => {
+  const parsed = registerZodSchema.safeParse(payload);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.issues[0].message };
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(parsed.data),
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      return { success: false, message: data.message || "Registration failed!" };
+    }
+    return { success: true, message: data.message, data: data.data };
+  } catch (error: unknown) {
+    console.error("Register Server Action Error:", error);
+    return { success: false, message: "Internal server error during registration" };
+  }
+};
+
+// ==========================================
+// 3. Verify Email Action
+// ==========================================
+export const verifyEmailAction = async (payload: IVerifyEmailPayload) => {
+  const parsed = verifyEmailZodSchema.safeParse(payload);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.issues[0].message };
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/verify-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(parsed.data),
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      return { success: false, message: data.message || "Verification failed!" };
+    }
+    return { success: true, message: data.message };
+  } catch (error: unknown) {
+    console.error("Verify Email Server Action Error:", error);
+    return { success: false, message: "Internal server error during verification" };
+  }
+};
+
+// ==========================================
+// 4. Resend OTP Action
+// ==========================================
+export const resendVerifyOtpAction = async (payload: IForgotPasswordPayload) => {
+  const parsed = forgotPasswordZodSchema.safeParse(payload); // Reusing forgot password schema since it just needs email
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.issues[0].message };
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/resend-verification-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(parsed.data),
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      return { success: false, message: data.message || "Failed to resend OTP!" };
+    }
+    return { success: true, message: data.message };
+  } catch (error: unknown) {
+    console.error("Resend OTP Server Action Error:", error);
+    return { success: false, message: "Internal server error during OTP resend" };
+  }
+};
+
+// ==========================================
+// 5. Forgot Password Action (Also used for resend forgot pass OTP)
+// ==========================================
+export const forgotPasswordAction = async (payload: IForgotPasswordPayload) => {
+  const parsed = forgotPasswordZodSchema.safeParse(payload);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.issues[0].message };
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(parsed.data),
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      return { success: false, message: data.message || "Failed to send reset link!" };
+    }
+    return { success: true, message: data.message };
+  } catch (error: unknown) {
+    console.error("Forgot Password Server Action Error:", error);
+    return { success: false, message: "Internal server error during forgot password" };
+  }
+};
+
+// ==========================================
+// 6. Reset Password Action
+// ==========================================
+export const resetPasswordAction = async (payload: IResetPasswordPayload) => {
+  const parsed = resetPasswordZodSchema.safeParse(payload);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.issues[0].message };
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(parsed.data),
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      return { success: false, message: data.message || "Failed to reset password!" };
+    }
+    return { success: true, message: data.message };
+  } catch (error: unknown) {
+    console.error("Reset Password Server Action Error:", error);
+    return { success: false, message: "Internal server error during password reset" };
   }
 };

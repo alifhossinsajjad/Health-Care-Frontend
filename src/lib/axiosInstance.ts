@@ -13,10 +13,25 @@ if (!API_BASE_URL) {
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
+  withCredentials: true, // Crucial for sending HttpOnly cookies (like refreshToken)
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (value?: unknown) => void; reject: (reason?: any) => void }> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 // Request Interceptor: Universal (Works on both Server and Client)
 axiosInstance.interceptors.request.use(
@@ -52,22 +67,77 @@ axiosInstance.interceptors.request.use(
   },
 );
 
-// Response Interceptor: Global Error Handling
+// Response Interceptor: Global Error Handling & Refresh Token
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (
-      error.response &&
-      (error.response.status === 401 || error.response.status === 403)
-    ) {
-      console.error("Unauthorized! Redirecting to login...");
-      if (typeof window !== "undefined") {
-        // localStorage.removeItem('accessToken');
-        // window.location.href = '/login';
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If 401 Unauthorized and we haven't already retried
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      // If already refreshing, put this request in a queue
+      if (isRefreshing) {
+        return new Promise(function (resolve, reject) {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = "Bearer " + token;
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        // Call the refresh token API
+        const refreshResponse = await axios.post(
+          `${API_BASE_URL}/auth/refresh-token`,
+          {},
+          { withCredentials: true } // Ensure refresh token cookie is sent
+        );
+
+        const newAccessToken =
+          refreshResponse.data?.data?.accessToken ||
+          refreshResponse.data?.accessToken;
+
+        if (newAccessToken) {
+          // Update Local Storage if on client
+          if (typeof window !== "undefined") {
+            localStorage.setItem("accessToken", newAccessToken);
+          }
+
+          // Update Authorization headers
+          axiosInstance.defaults.headers.common["Authorization"] =
+            "Bearer " + newAccessToken;
+          originalRequest.headers.Authorization = "Bearer " + newAccessToken;
+
+          processQueue(null, newAccessToken);
+          return axiosInstance(originalRequest); // Retry the original request
+        } else {
+          throw new Error("No access token returned from refresh API");
+        }
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+
+        // If refresh fails (e.g. refresh token expired), log out the user
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("accessToken");
+          window.location.href = "/login";
+        }
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
+
     return Promise.reject(error);
-  },
+  }
 );
 
 // --- FACADE PATTERN (httpClient) ---
