@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// লগিনের জন্য বেসিক চেকিং (শুধু ঘর পূরণ করেছে কি না তা দেখা)
 export const loginZodSchema = z.object({
   email: z
     .string({ message: "Email is required" })
