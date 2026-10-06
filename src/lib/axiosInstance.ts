@@ -1,51 +1,102 @@
-import axios from 'axios';
+import axios from "axios";
+import { ApiResponse } from "@/src/types/api.type";
 
-// Base URL সেট করা (.env ফাইল থেকে আসবে)
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+if (!API_BASE_URL) {
+  throw new Error(
+    "NEXT_PUBLIC_API_BASE_URL is not defined in the environment variables.",
+  );
+}
+
+// Base API URL
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1',
-  timeout: 10000, // 10 seconds timeout
+  baseURL: API_BASE_URL,
+  timeout: 30000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
-// Request Interceptor: প্রতিটি API কলের আগে এটি রান করবে
+// Request Interceptor: Universal (Works on both Server and Client)
 axiosInstance.interceptors.request.use(
-  (config) => {
-    // LocalStorage বা Cookies থেকে টোকেন নেওয়া
-    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-    
-    // টোকেন থাকলে সেটি Authorization হেডারে যুক্ত করে দেওয়া
+  async (config) => {
+    let token = null;
+
+    if (typeof window === "undefined") {
+      // Server-side Environment
+      try {
+        // Dynamically import next/headers to avoid breaking Client Components
+        const { cookies } = await import("next/headers");
+        const cookieStore = await cookies();
+        token = cookieStore.get("accessToken")?.value;
+
+        // Optional: Token Refresh Logic on Server can be added here
+      } catch (error) {
+        console.error("Failed to get cookies on server", error);
+      }
+    } else {
+      // Client-side Environment (Browser)
+      token = localStorage.getItem("accessToken");
+    }
+
+    // Attach token to headers
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
-// Response Interceptor: ব্যাকএন্ড থেকে রেসপন্স আসার পর এটি রান করবে
+// Response Interceptor: Global Error Handling
 axiosInstance.interceptors.response.use(
-  (response) => {
-    // ডেটা সরাসরি রিটার্ন করা যাতে কম্পোনেন্টে response.data.data না লিখতে হয়
-    return response;
-  },
+  (response) => response,
   (error) => {
-    // গ্লোবাল এরর হ্যান্ডলিং (যেমন: 401 Unauthorized হলে লগিন পেজে পাঠানো)
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      console.error('Unauthorized! Redirecting to login...');
-      // TODO: Logout logic or redirect to /login
-      if (typeof window !== 'undefined') {
+    if (
+      error.response &&
+      (error.response.status === 401 || error.response.status === 403)
+    ) {
+      console.error("Unauthorized! Redirecting to login...");
+      if (typeof window !== "undefined") {
         // localStorage.removeItem('accessToken');
         // window.location.href = '/login';
       }
     }
-    
     return Promise.reject(error);
-  }
+  },
 );
+
+// --- FACADE PATTERN (httpClient) ---
+export interface ApiRequestOptions {
+  params?: Record<string, unknown>;
+  headers?: Record<string, string>;
+}
+
+export const httpClient = {
+  get: async <T>(url: string, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
+    const response = await axiosInstance.get<ApiResponse<T>>(url, options);
+    return response.data;
+  },
+  post: async <T>(url: string, data: unknown, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
+    const response = await axiosInstance.post<ApiResponse<T>>(url, data, options);
+    return response.data;
+  },
+  put: async <T>(url: string, data: unknown, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
+    const response = await axiosInstance.put<ApiResponse<T>>(url, data, options);
+    return response.data;
+  },
+  patch: async <T>(url: string, data: unknown, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
+    const response = await axiosInstance.patch<ApiResponse<T>>(url, data, options);
+    return response.data;
+  },
+  delete: async <T>(url: string, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
+    const response = await axiosInstance.delete<ApiResponse<T>>(url, options);
+    return response.data;
+  },
+};
 
 export default axiosInstance;

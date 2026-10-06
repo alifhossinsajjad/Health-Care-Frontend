@@ -26,9 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-full flex flex-col">
         <AppProviders>
-          {" "}
-          RootLayout
-          <br />
+     
           {children}
         </AppProviders>
       </body>
