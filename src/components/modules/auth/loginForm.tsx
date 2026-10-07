@@ -1,79 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { jwtDecode } from "jwt-decode";
+import { useLogin } from "@/src/hooks/auth/useLogin";
 
-import { loginZodSchema, ILoginPayload } from "@/src/zod/auth.validation";
-import { loginAction } from "@/src/actions/auth.action";
-
-import AppField from "../../sheard/form/AppField";
-import AppSubmitButton from "../../sheard/form/AppSubmitButton";
+import AppField from "../../shared/form/AppField";
+import AppSubmitButton from "../../shared/form/AppSubmitButton";
 import { Button } from "@/src/components/ui/button";
 
 export default function LoginForm() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-
+  const { form, isLoading, onSubmit } = useLogin();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ILoginPayload>({
-    resolver: zodResolver(loginZodSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const onSubmit = async (data: ILoginPayload) => {
-    setIsLoading(true);
-
-    try {
-      const response = await loginAction(data);
-
-      if (response.success) {
-        if (response.accessToken) {
-          localStorage.setItem("accessToken", response.accessToken);
-
-          try {
-            // Decode the token to get the user's role
-            const decodedToken: any = jwtDecode(response.accessToken);
-            const userRole = decodedToken?.role?.toUpperCase();
-
-            toast.success(response.message);
-
-            // Route based on role
-            if (userRole === "ADMIN" || userRole === "SUPER_ADMIN") {
-              router.push("/admin/dashboard");
-            } else if (userRole === "DOCTOR") {
-              router.push("/doctor/dashboard");
-            } else {
-              router.push("/dashboard"); // Default for PATIENT
-            }
-          } catch (error) {
-            // Fallback in case of decoding error
-            toast.success(response.message);
-            router.push("/dashboard");
-          }
-        } else {
-          toast.success(response.message);
-          router.push("/dashboard");
-        }
-      } else {
-        toast.error(response.message);
-      }
-    } catch (error) {
-      toast.error("An unexpected error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  } = form;
 
   return (
     <div className="w-full max-w-md mx-auto p-8 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl transition-all">

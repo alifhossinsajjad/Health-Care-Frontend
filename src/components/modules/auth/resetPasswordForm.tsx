@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useResetPassword } from "@/src/hooks/auth/useResetPassword";
-import AppField from "../../sheard/form/AppField";
-import AppSubmitButton from "../../sheard/form/AppSubmitButton";
+import AppField from "../../shared/form/AppField";
+import AppSubmitButton from "../../shared/form/AppSubmitButton";
 import { Button } from "@/src/components/ui/button";
 
 export default function ResetPasswordForm() {
-  const { form, isLoading, isResending, onSubmit, onResendOtp } = useResetPassword();
+  const { form, isLoading, isResending, onSubmit, onResendOtp } =
+    useResetPassword();
   const {
     register,
     handleSubmit,
@@ -33,7 +34,7 @@ export default function ResetPasswordForm() {
             error={errors.email?.message}
             {...register("email")}
           />
-          
+
           <AppField
             label="OTP Code"
             type="text"
@@ -54,16 +55,19 @@ export default function ResetPasswordForm() {
           />
         </div>
 
-        <AppSubmitButton isPending={isLoading} pendingLabel="Resetting Password...">
+        <AppSubmitButton
+          isPending={isLoading}
+          pendingLabel="Resetting Password..."
+        >
           Reset Password
         </AppSubmitButton>
       </form>
 
       <div className="flex flex-col items-center justify-center space-y-4">
-        <Button 
-          variant="link" 
+        <Button
+          variant="link"
           type="button"
-          onClick={onResendOtp} 
+          onClick={onResendOtp}
           disabled={isResending || isLoading}
           className="text-sm"
         >

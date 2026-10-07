@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useVerifyEmail } from "@/src/hooks/auth/useVerifyEmail";
-import AppField from "../../sheard/form/AppField";
-import AppSubmitButton from "../../sheard/form/AppSubmitButton";
+import AppField from "../../shared/form/AppField";
+import AppSubmitButton from "../../shared/form/AppSubmitButton";
 import { Button } from "@/src/components/ui/button";
 
 export default function VerifyEmailForm() {

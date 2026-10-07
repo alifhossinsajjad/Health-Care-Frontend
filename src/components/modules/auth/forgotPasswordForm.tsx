@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useForgotPassword } from "@/src/hooks/auth/useForgotPassword";
-import AppField from "../../sheard/form/AppField";
-import AppSubmitButton from "../../sheard/form/AppSubmitButton";
+import AppField from "../../shared/form/AppField";
+import AppSubmitButton from "../../shared/form/AppSubmitButton";
 
 export default function ForgotPasswordForm() {
   const { form, isLoading, onSubmit } = useForgotPassword();
@@ -18,7 +18,8 @@ export default function ForgotPasswordForm() {
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold tracking-tight">Forgot Password</h1>
         <p className="text-sm text-muted-foreground">
-          Enter your email address and we will send you a 6-digit OTP to reset your password.
+          Enter your email address and we will send you a 6-digit OTP to reset
+          your password.
         </p>
       </div>
 

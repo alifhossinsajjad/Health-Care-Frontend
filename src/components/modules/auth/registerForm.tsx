@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRegister } from "@/src/hooks/auth/useRegister";
-import AppField from "../../sheard/form/AppField";
-import AppSubmitButton from "../../sheard/form/AppSubmitButton";
+import AppField from "../../shared/form/AppField";
+import AppSubmitButton from "../../shared/form/AppSubmitButton";
 
 export default function RegisterForm() {
   const { form, isLoading, onSubmit } = useRegister();
@@ -41,7 +41,7 @@ export default function RegisterForm() {
             error={errors.email?.message}
             {...register("email")}
           />
-          
+
           <AppField
             label="Contact Number"
             type="tel"
@@ -61,7 +61,10 @@ export default function RegisterForm() {
           />
         </div>
 
-        <AppSubmitButton isPending={isLoading} pendingLabel="Creating account...">
+        <AppSubmitButton
+          isPending={isLoading}
+          pendingLabel="Creating account..."
+        >
           Sign up
         </AppSubmitButton>
       </form>
