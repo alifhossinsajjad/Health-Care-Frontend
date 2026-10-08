@@ -1,7 +1,5 @@
-import React from 'react'
+import React from "react";
 
-export const BookAppointmentsPage = () => {
-  return (
-    <div>BookAppointmentsPage</div>
-  )
+export default function BookAppointmentsPage() {
+  return <div>BookAppointmentsPage</div>;
 }

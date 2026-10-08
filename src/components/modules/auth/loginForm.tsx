@@ -77,7 +77,9 @@ export default function LoginForm() {
         className="w-full"
         disabled={isLoading}
         onClick={() => {
-          window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login/google`;
+          const searchParams = new URLSearchParams(window.location.search);
+          const redirect = searchParams.get("redirect") || "/dashboard";
+          window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login/google?redirect=${encodeURIComponent(redirect)}`;
         }}
       >
         <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">

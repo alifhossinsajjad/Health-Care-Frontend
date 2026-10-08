@@ -20,7 +20,10 @@ const axiosInstance = axios.create({
 });
 
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: (value?: unknown) => void; reject: (reason?: any) => void }> = [];
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void;
+  reject: (reason?: any) => void;
+}> = [];
 
 const processQueue = (error: any, token: string | null = null) => {
   failedQueue.forEach((prom) => {
@@ -99,7 +102,7 @@ axiosInstance.interceptors.response.use(
         const refreshResponse = await axios.post(
           `${API_BASE_URL}/auth/refresh-token`,
           {},
-          { withCredentials: true } // Ensure refresh token cookie is sent
+          { withCredentials: true }, // Ensure refresh token cookie is sent
         );
 
         const newAccessToken =
@@ -137,7 +140,7 @@ axiosInstance.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // --- FACADE PATTERN (httpClient) ---
@@ -147,23 +150,53 @@ export interface ApiRequestOptions {
 }
 
 export const httpClient = {
-  get: async <T>(url: string, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
+  get: async <T>(
+    url: string,
+    options?: ApiRequestOptions,
+  ): Promise<ApiResponse<T>> => {
     const response = await axiosInstance.get<ApiResponse<T>>(url, options);
     return response.data;
   },
-  post: async <T>(url: string, data: unknown, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
-    const response = await axiosInstance.post<ApiResponse<T>>(url, data, options);
+  post: async <T>(
+    url: string,
+    data: unknown,
+    options?: ApiRequestOptions,
+  ): Promise<ApiResponse<T>> => {
+    const response = await axiosInstance.post<ApiResponse<T>>(
+      url,
+      data,
+      options,
+    );
     return response.data;
   },
-  put: async <T>(url: string, data: unknown, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
-    const response = await axiosInstance.put<ApiResponse<T>>(url, data, options);
+  put: async <T>(
+    url: string,
+    data: unknown,
+    options?: ApiRequestOptions,
+  ): Promise<ApiResponse<T>> => {
+    const response = await axiosInstance.put<ApiResponse<T>>(
+      url,
+      data,
+      options,
+    );
     return response.data;
   },
-  patch: async <T>(url: string, data: unknown, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
-    const response = await axiosInstance.patch<ApiResponse<T>>(url, data, options);
+  patch: async <T>(
+    url: string,
+    data: unknown,
+    options?: ApiRequestOptions,
+  ): Promise<ApiResponse<T>> => {
+    const response = await axiosInstance.patch<ApiResponse<T>>(
+      url,
+      data,
+      options,
+    );
     return response.data;
   },
-  delete: async <T>(url: string, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
+  delete: async <T>(
+    url: string,
+    options?: ApiRequestOptions,
+  ): Promise<ApiResponse<T>> => {
     const response = await axiosInstance.delete<ApiResponse<T>>(url, options);
     return response.data;
   },

@@ -1,7 +1,5 @@
-import React from 'react'
+import React from "react";
 
-export const HealthRecordsPage = () => {
-  return (
-    <div>HealthRecordsPage</div>
-  )
+export default function HealthRecordsPage() {
+  return <div>HealthRecordsPage</div>;
 }

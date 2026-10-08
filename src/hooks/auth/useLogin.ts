@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { jwtDecode } from "jwt-decode";
 import { ILoginPayload, loginZodSchema } from "@/src/zod/auth.validation";
@@ -9,6 +9,7 @@ import { loginAction } from "@/src/actions/auth.action";
 
 export const useLogin = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<ILoginPayload>({
@@ -35,7 +36,10 @@ export const useLogin = () => {
 
             toast.success(response.message);
 
-            if (userRole === "ADMIN" || userRole === "SUPER_ADMIN") {
+            const redirectPath = searchParams.get("redirect");
+            if (redirectPath) {
+              router.push(redirectPath);
+            } else if (userRole === "ADMIN" || userRole === "SUPER_ADMIN") {
               router.push("/admin/dashboard");
             } else if (userRole === "DOCTOR") {
               router.push("/doctor/dashboard");
@@ -44,11 +48,13 @@ export const useLogin = () => {
             }
           } catch (error) {
             toast.success(response.message);
-            router.push("/dashboard");
+            const redirectPath = searchParams.get("redirect");
+            router.push(redirectPath || "/dashboard");
           }
         } else {
           toast.success(response.message);
-          router.push("/dashboard");
+          const redirectPath = searchParams.get("redirect");
+          router.push(redirectPath || "/dashboard");
         }
       } else {
         // Here we handle the unverified email edge-case!
