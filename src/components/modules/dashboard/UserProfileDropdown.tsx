@@ -66,31 +66,37 @@ export function UserProfileDropdown({ initialRole = "", initialEmail = "" }: Use
         </div>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
+      <DropdownMenuContent 
+        className="w-56 font-sans bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl p-2" 
+        align="end" 
+        forceMount
+      >
+        <DropdownMenuLabel className="font-normal p-2">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">
+            <p className="text-sm font-semibold leading-none text-zinc-900 dark:text-zinc-100">
               {isLoading ? "Loading..." : displayName}
             </p>
-            <p className="text-xs leading-none text-muted-foreground">
+            <p className="text-xs leading-none text-zinc-500 dark:text-zinc-400 mt-1">
               {displayEmail}
             </p>
             {displayRole && (
-              <p className="text-xs font-semibold leading-none text-primary/80 capitalize mt-2">
-                {displayRole.toLowerCase()}
-              </p>
+              <div className="mt-2.5">
+                <span className="text-[10px] font-bold tracking-wider text-primary bg-primary/10 px-2 py-1 rounded-md uppercase">
+                  {displayRole}
+                </span>
+              </div>
             )}
           </div>
         </DropdownMenuLabel>
-
-        <DropdownMenuSeparator />
-
+        
+        <DropdownMenuSeparator className="bg-zinc-100 dark:bg-zinc-800 my-1" />
+        
         <DropdownMenuItem
           onClick={handleLogout}
-          className="text-red-600 cursor-pointer focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-950"
+          className="text-red-600 flex items-center cursor-pointer hover:bg-red-50 hover:text-red-700 focus:bg-red-50 focus:text-red-700 dark:hover:bg-red-950/30 dark:focus:bg-red-950/30 dark:text-red-500 p-2 rounded-md transition-all mt-1"
         >
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span className="font-medium">Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

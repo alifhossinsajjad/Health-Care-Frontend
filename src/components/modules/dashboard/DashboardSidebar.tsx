@@ -15,13 +15,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/src/components/ui/sidebar";
-import { SIDEBAR_LINKS, UserRole } from "@/src/constants/sidebar.config";
+import { getNavItemsByRole, UserRole } from "@/src/constants/sidebar.config";
 
 export function DashboardSidebar({ userRole }: { userRole: UserRole }) {
   const pathname = usePathname();
   
-  // Fallback to PATIENT if role is missing or invalid
-  const links = SIDEBAR_LINKS[userRole] || SIDEBAR_LINKS.PATIENT;
+  // Use the new sectioned config
+  const navSections = getNavItemsByRole(userRole);
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
@@ -34,31 +34,35 @@ export function DashboardSidebar({ userRole }: { userRole: UserRole }) {
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {links.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={item.title}
-                    >
-                      <Link href={item.href}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {navSections.map((section, index) => (
+          <SidebarGroup key={index}>
+            {section.title && <SidebarGroupLabel>{section.title}</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {section.items.map((item) => {
+                  // We check if the exact path matches, or if it's a child path
+                  // but for the root dashboard path (e.g. `/dashboard`), we only highlight if exact match
+                  const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
+                  
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        tooltip={item.title}
+                      >
+                        <Link href={item.href}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
     </Sidebar>
   );

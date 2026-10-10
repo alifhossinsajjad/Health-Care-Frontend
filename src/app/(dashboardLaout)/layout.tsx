@@ -23,7 +23,7 @@ export default async function RootDashboardLayout({
   let userEmail = "";
   try {
     const decoded: any = jwtDecode(token);
-    userRole = decoded?.role === "SUPER_ADMIN" ? "ADMIN" : (decoded?.role as UserRole) || "PATIENT";
+    userRole = (decoded?.role as UserRole) || "PATIENT";
     userEmail = decoded?.email || "";
   } catch (error) {
     console.error("Failed to decode token in layout", error);
