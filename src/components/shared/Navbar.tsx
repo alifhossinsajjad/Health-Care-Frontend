@@ -22,6 +22,19 @@ export function Navbar() {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  const pathname = usePathname();
+
+  const getLinkClasses = (path: string) => {
+    // Exact match for Home, startswith for others like /doctors, /doctors/123
+    const isActive = path === "/" ? pathname === path : pathname.startsWith(path);
+    
+    return `text-sm font-semibold transition-all duration-300 ${
+      isActive 
+        ? "text-blue-600 dark:text-blue-500 border-b-2 border-blue-600 dark:border-blue-500 pb-1" 
+        : "text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-500"
+    }`;
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
@@ -39,29 +52,17 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8 font-medium">
-          <Link
-            href="/"
-            className="text-sm transition-colors hover:text-primary"
-          >
+        <nav className="hidden md:flex items-center gap-8 font-medium mt-1">
+          <Link href="/" className={getLinkClasses("/")}>
             Home
           </Link>
-          <Link
-            href="/doctors"
-            className="text-sm transition-colors hover:text-primary"
-          >
+          <Link href="/doctors" className={getLinkClasses("/doctors")}>
             Find Doctors
           </Link>
-          <Link
-            href="/services"
-            className="text-sm transition-colors hover:text-primary"
-          >
+          <Link href="/services" className={getLinkClasses("/services")}>
             Services
           </Link>
-          <Link
-            href="/contact"
-            className="text-sm transition-colors hover:text-primary"
-          >
+          <Link href="/contact" className={getLinkClasses("/contact")}>
             Contact
           </Link>
         </nav>
@@ -103,19 +104,25 @@ export function Navbar() {
               <nav className="flex flex-col gap-6 mt-8">
                 <Link
                   href="/"
-                  className="text-lg font-semibold hover:text-primary"
+                  className={`text-lg font-semibold transition-colors ${
+                    pathname === "/" ? "text-blue-600 dark:text-blue-500" : "hover:text-blue-600 dark:hover:text-blue-500"
+                  }`}
                 >
                   Home
                 </Link>
                 <Link
                   href="/doctors"
-                  className="text-lg font-semibold hover:text-primary"
+                  className={`text-lg font-semibold transition-colors ${
+                    pathname.startsWith("/doctors") ? "text-blue-600 dark:text-blue-500" : "hover:text-blue-600 dark:hover:text-blue-500"
+                  }`}
                 >
                   Find Doctors
                 </Link>
                 <Link
                   href="/services"
-                  className="text-lg font-semibold hover:text-primary"
+                  className={`text-lg font-semibold transition-colors ${
+                    pathname.startsWith("/services") ? "text-blue-600 dark:text-blue-500" : "hover:text-blue-600 dark:hover:text-blue-500"
+                  }`}
                 >
                   Services
                 </Link>
