@@ -2,12 +2,7 @@ import * as React from "react";
 import { getDashboardStats } from "@/src/services/stats.service";
 import { StatCard } from "@/src/components/shared/stats/StatCard";
 import { DashboardPieChart } from "@/src/components/shared/stats/StatCharts";
-import {
-  Users,
-  CalendarCheck,
-  Star,
-  DollarSign,
-} from "lucide-react";
+import { Users, CalendarCheck, Star, DollarSign } from "lucide-react";
 
 export default async function DoctorDashboardPage() {
   const { success, data: stats, message } = await getDashboardStats();
@@ -15,8 +10,12 @@ export default async function DoctorDashboardPage() {
   if (!success || !stats) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-        <h2 className="text-2xl font-bold text-red-600 mb-2">Error Loading Dashboard</h2>
-        <p className="text-zinc-500">{message || "Failed to fetch the latest statistics."}</p>
+        <h2 className="text-2xl font-bold text-red-600 mb-2">
+          Error Loading Dashboard
+        </h2>
+        <p className="text-zinc-500">
+          {message || "Failed to fetch the latest statistics."}
+        </p>
       </div>
     );
   }
@@ -60,12 +59,13 @@ export default async function DoctorDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-        {stats.appointmentStatusDistribution && stats.appointmentStatusDistribution.length > 0 && (
-          <DashboardPieChart 
-            data={stats.appointmentStatusDistribution} 
-            title="Appointment Status Distribution" 
-          />
-        )}
+        {stats.appointmentStatusDistribution &&
+          stats.appointmentStatusDistribution.length > 0 && (
+            <DashboardPieChart
+              data={stats.appointmentStatusDistribution}
+              title="Appointment Status Distribution"
+            />
+          )}
       </div>
     </div>
   );

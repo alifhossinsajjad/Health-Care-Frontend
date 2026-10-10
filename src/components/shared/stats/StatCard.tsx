@@ -22,34 +22,47 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden flex flex-col gap-4 p-6 rounded-3xl bg-gradient-to-br from-white to-zinc-50/80 dark:from-zinc-950 dark:to-zinc-900/80 border border-zinc-200/60 dark:border-zinc-800/60 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(6,81,237,0.1)] transition-all duration-300 hover:-translate-y-1",
-        className
+        "group relative overflow-hidden flex flex-col justify-between p-6 rounded-3xl bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-zinc-300 dark:hover:border-zinc-700 min-h-[160px]",
+        className,
       )}
     >
-      <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-gradient-to-br from-transparent to-zinc-100 dark:to-zinc-800 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-      
-      <div className="flex items-center justify-between relative z-10">
-        <p className="text-sm font-semibold tracking-wide text-zinc-500 dark:text-zinc-400 uppercase">
-          {title}
-        </p>
+      {/* Background Pattern / Glow */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+      <div
+        className={cn(
+          "absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none",
+          iconClassName?.split(" ")[0],
+        )}
+      />
+
+      <div className="flex items-start justify-between relative z-10">
+        <div className="flex flex-col gap-1">
+          <p className="text-sm font-bold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase">
+            {title}
+          </p>
+          <h3 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-zinc-50 mt-1">
+            {value}
+          </h3>
+        </div>
+
         <div
           className={cn(
-            "p-2.5 rounded-xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3",
-            iconClassName
+            "p-3 rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-[10deg] shadow-sm",
+            iconClassName,
           )}
         >
-          <Icon className="w-5 h-5" />
+          <Icon className="w-6 h-6" strokeWidth={2.5} />
         </div>
       </div>
-      
-      <div className="flex flex-col gap-1.5 relative z-10 mt-2">
-        <h3 className="text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-zinc-900 to-zinc-600 dark:from-zinc-100 dark:to-zinc-400">
-          {value}
-        </h3>
-        {description && (
-          <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500">
+
+      <div className="relative z-10 mt-4 flex items-center">
+        {description ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
+            <span className="w-1.5 h-1.5 rounded-full bg-current" />
             {description}
-          </p>
+          </span>
+        ) : (
+          <div className="h-6" /> // Placeholder to keep height consistent
         )}
       </div>
     </div>

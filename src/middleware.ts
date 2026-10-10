@@ -20,7 +20,7 @@ const AuthRoutes = [
   "/reset-password",
   "/verify-email",
 ];
-const CommonRoutes = ["/dashboard", "/profile", "/change-password"];
+const CommonRoutes = ["/profile", "/change-password"];
 const RoleBasedRoutes = {
   PATIENT: [/^\/dashboard($|\/)/],
   DOCTOR: [/^\/doctor($|\/)/],

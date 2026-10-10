@@ -41,37 +41,43 @@ export default async function AdminPage() {
           title="Total Revenue"
           value={`$${stats.totalRevenue?.toLocaleString() || 0}`}
           icon={DollarSign}
-          iconClassName="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-500"
+          iconClassName="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+          description="+12.5% from last month"
         />
         <StatCard
           title="Appointments"
           value={stats.appointmentCount || 0}
           icon={CalendarCheck}
-          iconClassName="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-500"
+          iconClassName="bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
+          description="Active sessions"
         />
         <StatCard
           title="Total Users"
           value={stats.userCount || 0}
           icon={Users}
-          iconClassName="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-500"
+          iconClassName="bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400"
+          description="Registered users"
         />
         <StatCard
           title="Doctors"
           value={stats.doctorCount || 0}
           icon={Stethoscope}
-          iconClassName="bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-500"
+          iconClassName="bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400"
+          description="Medical staff"
         />
         <StatCard
           title="Patients"
           value={stats.patientCount || 0}
           icon={UserCheck}
-          iconClassName="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-500"
+          iconClassName="bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
+          description="Enrolled patients"
         />
         <StatCard
           title="Payments"
           value={stats.paymentCount || 0}
           icon={CreditCard}
-          iconClassName="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-500"
+          iconClassName="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+          description="Successful txns"
         />
         <StatCard
           title="Admins"

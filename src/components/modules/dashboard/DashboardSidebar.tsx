@@ -40,19 +40,29 @@ export function DashboardSidebar({ userRole }: { userRole: UserRole }) {
             <SidebarGroupContent>
               <SidebarMenu>
                 {section.items.map((item) => {
-                  // We check if the exact path matches, or if it's a child path
-                  // but for the root dashboard path (e.g. `/dashboard`), we only highlight if exact match
-                  const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
+                  // We check if the exact path matches.
+                  // For nested routes, we only highlight if the item is not the root dashboard.
+                  // E.g., if item is /admin/dashboard/doctors, it highlights for /admin/dashboard/doctors/xyz
+                  const isDashboardRoot = item.href === "/admin/dashboard" || item.href === "/doctor/dashboard" || item.href === "/dashboard";
+                  
+                  const isActive = isDashboardRoot 
+                    ? pathname === item.href 
+                    : pathname === item.href || pathname.startsWith(item.href + "/");
                   
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
-                        isActive={isActive}
+                        // We intentionally omit `isActive={isActive}` so Shadcn doesn't apply `data-[active=true]:bg-sidebar-accent` 
+                        // which overrides our custom `bg-blue-600` via Tailwind-merge conflicts.
                         tooltip={item.title}
+                        className={isActive 
+                          ? "bg-blue-600 text-white font-semibold shadow-md shadow-blue-500/20 hover:bg-blue-700 hover:text-white transition-all duration-300"
+                          : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                        }
                       >
                         <Link href={item.href}>
-                          <item.icon />
+                          <item.icon className={isActive ? "text-white" : "text-zinc-500"} />
                           <span>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
