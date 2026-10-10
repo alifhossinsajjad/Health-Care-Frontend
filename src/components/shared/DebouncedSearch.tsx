@@ -11,7 +11,11 @@ interface DebouncedSearchProps {
   className?: string;
 }
 
-export function DebouncedSearch({ placeholder = "Search...", delay = 500, className }: DebouncedSearchProps) {
+export function DebouncedSearch({
+  placeholder = "Search...",
+  delay = 500,
+  className,
+}: DebouncedSearchProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -28,7 +32,7 @@ export function DebouncedSearch({ placeholder = "Search...", delay = 500, classN
 
     const handler = setTimeout(() => {
       const params = new URLSearchParams(searchParams);
-      
+
       if (inputValue) {
         params.set("searchTerm", inputValue);
         // Reset to page 1 whenever a new search is made
@@ -49,7 +53,9 @@ export function DebouncedSearch({ placeholder = "Search...", delay = 500, classN
   };
 
   return (
-    <div className={`relative flex items-center w-full max-w-sm ${className || ""}`}>
+    <div
+      className={`relative flex items-center w-full max-w-sm ${className || ""}`}
+    >
       <Search className="absolute left-3 w-4 h-4 text-zinc-500" />
       <Input
         type="text"
