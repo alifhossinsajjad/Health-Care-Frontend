@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Activity, Menu } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/src/components/ui/sheet";
@@ -13,7 +14,7 @@ export function Navbar() {
     // Check if user is logged in by looking for accessToken in localStorage
     const token = localStorage.getItem("accessToken");
     setIsLoggedIn(!!token);
-    
+
     // Optional: Listen for storage events if they login/logout in another tab
     const handleStorageChange = () => {
       setIsLoggedIn(!!localStorage.getItem("accessToken"));
@@ -26,11 +27,12 @@ export function Navbar() {
 
   const getLinkClasses = (path: string) => {
     // Exact match for Home, startswith for others like /doctors, /doctors/123
-    const isActive = path === "/" ? pathname === path : pathname.startsWith(path);
-    
+    const isActive =
+      path === "/" ? pathname === path : pathname.startsWith(path);
+
     return `text-sm font-semibold transition-all duration-300 ${
-      isActive 
-        ? "text-blue-600 dark:text-blue-500 border-b-2 border-blue-600 dark:border-blue-500 pb-1" 
+      isActive
+        ? "text-blue-600 dark:text-blue-500 border-b-2 border-blue-600 dark:border-blue-500 pb-1"
         : "text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-500"
     }`;
   };
@@ -105,7 +107,9 @@ export function Navbar() {
                 <Link
                   href="/"
                   className={`text-lg font-semibold transition-colors ${
-                    pathname === "/" ? "text-blue-600 dark:text-blue-500" : "hover:text-blue-600 dark:hover:text-blue-500"
+                    pathname === "/"
+                      ? "text-blue-600 dark:text-blue-500"
+                      : "hover:text-blue-600 dark:hover:text-blue-500"
                   }`}
                 >
                   Home
@@ -113,7 +117,9 @@ export function Navbar() {
                 <Link
                   href="/doctors"
                   className={`text-lg font-semibold transition-colors ${
-                    pathname.startsWith("/doctors") ? "text-blue-600 dark:text-blue-500" : "hover:text-blue-600 dark:hover:text-blue-500"
+                    pathname.startsWith("/doctors")
+                      ? "text-blue-600 dark:text-blue-500"
+                      : "hover:text-blue-600 dark:hover:text-blue-500"
                   }`}
                 >
                   Find Doctors
@@ -121,7 +127,9 @@ export function Navbar() {
                 <Link
                   href="/services"
                   className={`text-lg font-semibold transition-colors ${
-                    pathname.startsWith("/services") ? "text-blue-600 dark:text-blue-500" : "hover:text-blue-600 dark:hover:text-blue-500"
+                    pathname.startsWith("/services")
+                      ? "text-blue-600 dark:text-blue-500"
+                      : "hover:text-blue-600 dark:hover:text-blue-500"
                   }`}
                 >
                   Services
@@ -136,7 +144,10 @@ export function Navbar() {
                   ) : (
                     <>
                       <Link href="/login" className="w-full">
-                        <Button variant="outline" className="w-full justify-center">
+                        <Button
+                          variant="outline"
+                          className="w-full justify-center"
+                        >
                           Sign in
                         </Button>
                       </Link>
