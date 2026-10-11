@@ -2,8 +2,10 @@ import React from "react";
 import { getAllDoctors } from "@/src/services/doctor.service";
 import { DebouncedSearch } from "@/src/components/shared/DebouncedSearch";
 import { DoctorAvatar } from "@/src/components/shared/DoctorAvatar";
+import { FilterSelect } from "@/src/components/shared/FilterSelect";
+import { AppPagination } from "@/src/components/shared/AppPagination";
 import Link from "next/link";
-import { MapPin, Briefcase, Star, Stethoscope, IndianRupee } from "lucide-react";
+import { MapPin, Briefcase, Star, Stethoscope, IndianRupee, SearchX } from "lucide-react";
 
 export const metadata = {
   title: "Find Doctors | Health Care",
@@ -22,29 +24,74 @@ export default async function DoctorsPage({ searchParams }: DoctorsPageProps) {
   const searchTerm = resolvedParams.searchTerm || "";
   const page = Number(resolvedParams.page) || 1;
   const limit = Number(resolvedParams.limit) || 12;
+  const gender = resolvedParams.gender || undefined;
+  
+  // Sorting for fee
+  const sortOption = resolvedParams.sort || undefined;
+  let sortBy;
+  let sortOrder;
+
+  if (sortOption === "fee-asc") {
+    sortBy = "appointmentFee";
+    sortOrder = "asc";
+  } else if (sortOption === "fee-desc") {
+    sortBy = "appointmentFee";
+    sortOrder = "desc";
+  }
 
   // Fetch data directly on the server
   const { success, data: doctors, meta } = await getAllDoctors({
     searchTerm,
     page,
     limit,
+    gender,
+    sortBy,
+    sortOrder,
   });
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-7xl">
       {/* Header & Search */}
-      <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 mb-2">
-            Find Your <span className="text-blue-600 dark:text-blue-500">Doctor</span>
-          </h1>
-          <p className="text-zinc-500 dark:text-zinc-400">
-            Book an appointment with our highly qualified medical professionals.
-          </p>
+      <div className="flex flex-col mb-10 gap-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 mb-2">
+              Find Your <span className="text-blue-600 dark:text-blue-500">Doctor</span>
+            </h1>
+            <p className="text-zinc-500 dark:text-zinc-400">
+              Book an appointment with our highly qualified medical professionals.
+            </p>
+          </div>
+          
+          <div className="w-full md:w-80">
+            <DebouncedSearch placeholder="Search by name, qualification..." />
+          </div>
         </div>
-        
-        <div className="w-full md:w-auto">
-          <DebouncedSearch placeholder="Search by name, qualification..." />
+
+        {/* Filters Row */}
+        <div className="flex flex-wrap items-center gap-4 bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+          <div className="w-full sm:w-48">
+            <FilterSelect 
+              paramName="gender" 
+              placeholder="Gender"
+              defaultLabel="All Genders"
+              options={[
+                { label: "Male", value: "MALE" },
+                { label: "Female", value: "FEMALE" }
+              ]}
+            />
+          </div>
+          <div className="w-full sm:w-48">
+            <FilterSelect 
+              paramName="sort" 
+              placeholder="Sort By Fee"
+              defaultLabel="All Appointment Fee"
+              options={[
+                { label: "Fee: Low to High", value: "fee-asc" },
+                { label: "Fee: High to Low", value: "fee-desc" }
+              ]}
+            />
+          </div>
         </div>
       </div>
 
@@ -54,8 +101,19 @@ export default async function DoctorsPage({ searchParams }: DoctorsPageProps) {
           {doctors.map((doctor) => (
             <div 
               key={doctor.id} 
-              className="group flex flex-col bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+              className="relative group flex flex-col bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
+              {/* Status Badge */}
+              <div className="absolute top-4 right-4 z-10">
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                  doctor.user?.status === "ACTIVE" 
+                    ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400" 
+                    : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+                }`}>
+                  {doctor.user?.status || "UNKNOWN"}
+                </span>
+              </div>
+
               {/* Card Header (Avatar + Name) */}
               <div className="p-6 flex flex-col items-center text-center border-b border-zinc-100 dark:border-zinc-800/50 bg-gradient-to-b from-zinc-50/50 to-white dark:from-zinc-900/20 dark:to-zinc-950">
                 <DoctorAvatar 
@@ -114,29 +172,15 @@ export default async function DoctorsPage({ searchParams }: DoctorsPageProps) {
           </p>
         </div>
       )}
+
+      {/* Pagination Footer */}
+      {meta && meta.total > 0 && (
+        <div className="mt-8">
+          <AppPagination meta={meta} />
+        </div>
+      )}
     </div>
   );
 }
 
-// Temporary placeholder for SearchX icon in the no-results state
-function SearchX(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m13.5 8.5-5 5" />
-      <path d="m8.5 8.5 5 5" />
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-  );
-}
+

@@ -1,6 +1,6 @@
 import React from 'react'
 
-export const NgosPage = () => {
+export default function NgosPage() {
   return (
     <div>NgosPage</div>
   )

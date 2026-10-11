@@ -3,23 +3,33 @@ import { getAllDoctors } from "@/src/services/doctor.service";
 import { DebouncedSearch } from "@/src/components/shared/DebouncedSearch";
 import { DataTable } from "@/src/components/shared/DataTable";
 import { doctorColumns } from "@/src/components/modules/doctors/columns";
+import { FilterSelect } from "@/src/components/shared/FilterSelect";
+import CreateDoctorSheet from "@/src/components/modules/doctors/CreateDoctorSheet";
 
 interface DoctorsManagementProps {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 
-export default async function DoctorsManagementPage({ searchParams }: DoctorsManagementProps) {
+export default async function DoctorsManagementPage({
+  searchParams,
+}: DoctorsManagementProps) {
   // Await search params (Next.js 15)
   const resolvedParams = await searchParams;
   const searchTerm = resolvedParams.searchTerm || "";
   const page = Number(resolvedParams.page) || 1;
   const limit = Number(resolvedParams.limit) || 10;
+  const gender = resolvedParams.gender || undefined;
 
   // Fetch data
-  const { success, data: doctors, meta } = await getAllDoctors({
+  const {
+    success,
+    data: doctors,
+    meta,
+  } = await getAllDoctors({
     searchTerm,
     page,
     limit,
+    gender,
   });
 
   return (
@@ -33,15 +43,29 @@ export default async function DoctorsManagementPage({ searchParams }: DoctorsMan
             View and manage all registered doctors in the system.
           </p>
         </div>
-        <div className="w-full md:w-80">
-          <DebouncedSearch placeholder="Search doctors by name or email..." />
+        <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+          <div className="w-full md:w-40">
+            <FilterSelect
+              paramName="gender"
+              placeholder="Gender"
+              defaultLabel="All Genders"
+              options={[
+                { label: "Male", value: "MALE" },
+                { label: "Female", value: "FEMALE" },
+              ]}
+            />
+          </div>
+          <div className="w-full md:w-80">
+            <DebouncedSearch placeholder="Search doctors by name or email..." />
+          </div>
+          <CreateDoctorSheet />
         </div>
       </div>
 
-      <DataTable 
-        columns={doctorColumns} 
-        data={success && doctors ? doctors : []} 
-        meta={meta} 
+      <DataTable
+        columns={doctorColumns}
+        data={success && doctors ? doctors : []}
+        meta={meta}
       />
     </div>
   );

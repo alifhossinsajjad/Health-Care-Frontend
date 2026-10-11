@@ -1,5 +1,5 @@
-export default function SchedulesManagementPage () {
-    return (
-        <div>SchedulesManagementPage</div>
-    )
-}   
+import { redirect } from "next/navigation";
+
+export default function SchedulesMenagementsRedirect() {
+  redirect("/admin/dashboard/schedules-management");
+}

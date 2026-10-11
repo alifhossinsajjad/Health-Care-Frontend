@@ -37,6 +37,9 @@ export interface IDoctor {
   updatedAt: string;
   userId: string;
   specialties: IDoctorSpecialty[];
+  user?: {
+    status: "ACTIVE" | "BLOCKED";
+  };
 }
 
 export interface IDoctorFilters {
@@ -47,4 +50,6 @@ export interface IDoctorFilters {
   appointmentFee?: number;
   "appointmentFee[gte]"?: number;
   "appointmentFee[lte]"?: number;
+  sortBy?: string;
+  sortOrder?: string;
 }

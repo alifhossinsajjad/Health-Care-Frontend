@@ -2,10 +2,12 @@ import React from "react";
 import { getAllSpecialties } from "@/src/services/specialty.service";
 import { DebouncedSearch } from "@/src/components/shared/DebouncedSearch";
 import Image from "next/image";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Hospital } from "lucide-react";
 import CreateSpecialtyModal from "@/src/components/modules/specialties/CreateSpecialtyModal";
 import SpecialtyIcon from "@/src/components/modules/specialties/SpecialtyIcon";
 import DeleteSpecialtyButton from "@/src/components/modules/specialties/DeleteSpecialtyButton";
+import { FilterSelect } from "@/src/components/shared/FilterSelect";
+import { AppPagination } from "@/src/components/shared/AppPagination";
 
 interface SpecialtiesManagementProps {
   searchParams: Promise<{ [key: string]: string | undefined }>;
@@ -19,6 +21,22 @@ export default async function SpecialtiesManagementPage({
   const page = Number(resolvedParams.page) || 1;
   const limit = Number(resolvedParams.limit) || 12; // 12 is good for grid layouts
 
+  // Sorting params mapping
+  const sortOption = resolvedParams.sort || "newest";
+  let sortBy = "createdAt";
+  let sortOrder = "desc";
+
+  if (sortOption === "a-z") {
+    sortBy = "title";
+    sortOrder = "asc";
+  } else if (sortOption === "z-a") {
+    sortBy = "title";
+    sortOrder = "desc";
+  } else if (sortOption === "oldest") {
+    sortBy = "createdAt";
+    sortOrder = "asc";
+  }
+
   const {
     success,
     data: specialties,
@@ -27,6 +45,8 @@ export default async function SpecialtiesManagementPage({
     searchTerm,
     page,
     limit,
+    sortBy,
+    sortOrder,
   });
 
   return (
@@ -41,7 +61,20 @@ export default async function SpecialtiesManagementPage({
             Manage medical specialties that doctors can be associated with.
           </p>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+          <div className="w-full md:w-40">
+            <FilterSelect 
+              paramName="sort" 
+              placeholder="Sort By" 
+              defaultLabel="All Specialties"
+              options={[
+                { label: "Newest First", value: "newest" },
+                { label: "Oldest First", value: "oldest" },
+                { label: "Title (A-Z)", value: "a-z" },
+                { label: "Title (Z-A)", value: "z-a" },
+              ]}
+            />
+          </div>
           <div className="w-full md:w-80">
             <DebouncedSearch placeholder="Search specialties..." />
           </div>
@@ -98,24 +131,10 @@ export default async function SpecialtiesManagementPage({
 
       {/* Pagination Footer */}
       {meta && meta.total > 0 && (
-        <div className="flex items-center justify-between px-2 pt-4">
-          <span className="text-sm text-zinc-500">
-            Showing{" "}
-            <span className="font-medium text-zinc-900 dark:text-zinc-100">
-              {specialties?.length || 0}
-            </span>{" "}
-            of{" "}
-            <span className="font-medium text-zinc-900 dark:text-zinc-100">
-              {meta.total}
-            </span>{" "}
-            specialties
-          </span>
-          {/* Reusable table's pagination component would ideally be extracted, but here we can keep it simple or implement a standalone pagination component. For now, since it's a grid, we can just show the total. */}
-        </div>
+        <AppPagination meta={meta} />
       )}
     </div>
   );
 }
 
-// Temporary import for the icon used in the empty state
-import { Hospital } from "lucide-react";
+

@@ -6,6 +6,8 @@ interface SpecialtyFilters {
   searchTerm?: string;
   page?: number;
   limit?: number;
+  sortBy?: string;
+  sortOrder?: string;
 }
 
 export const getAllSpecialties = async (
@@ -22,6 +24,12 @@ export const getAllSpecialties = async (
     }
     if (filters?.limit) {
       params["limit"] = filters.limit;
+    }
+    if (filters?.sortBy) {
+      params["sortBy"] = filters.sortBy;
+    }
+    if (filters?.sortOrder) {
+      params["sortOrder"] = filters.sortOrder;
     }
 
     return await httpClient.get<ISpecialty[]>("/specialties", { params });

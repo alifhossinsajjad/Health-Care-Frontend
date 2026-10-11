@@ -1,6 +1,5 @@
-import { API_BASE_URL } from "@/src/lib/axiosInstance";
+import { API_BASE_URL, httpClient } from "@/src/lib/axiosInstance";
 import { IDoctor, IDoctorFilters } from "@/src/types/doctor.type";
-import { cookies } from "next/headers";
 
 interface IMeta {
   page: number;
@@ -9,12 +8,20 @@ interface IMeta {
 }
 
 export const getAllDoctors = async (
-  filters: IDoctorFilters = {}
-): Promise<{ success: boolean; data?: IDoctor[]; meta?: IMeta; message?: string }> => {
+  filters: IDoctorFilters = {},
+): Promise<{
+  success: boolean;
+  data?: IDoctor[];
+  meta?: IMeta;
+  message?: string;
+}> => {
   try {
-    // We pass cookies just in case the API returns more details for authenticated users
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
+    let accessToken;
+    if (typeof window === "undefined") {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      accessToken = cookieStore.get("accessToken")?.value;
+    }
 
     // Convert filters object into URLSearchParams
     const params = new URLSearchParams();
@@ -33,30 +40,38 @@ export const getAllDoctors = async (
         "Content-Type": "application/json",
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
-      // Keep caching enabled for public routes but allow revalidation
-      // If search params are heavily used, it's basically dynamic rendering
       next: { revalidate: 0 },
     });
 
     const data = await response.json();
 
     if (!response.ok || !data.success) {
-      return { success: false, message: data.message || "Failed to fetch doctors" };
+      return {
+        success: false,
+        message: data.message || "Failed to fetch doctors",
+      };
     }
 
     return { success: true, data: data.data, meta: data.meta };
   } catch (error: any) {
     console.error("Fetch Doctors Error:", error);
-    return { success: false, message: "Internal server error fetching doctors" };
+    return {
+      success: false,
+      message: "Internal server error fetching doctors",
+    };
   }
 };
 
 export const getDoctorById = async (
-  id: string
+  id: string,
 ): Promise<{ success: boolean; data?: IDoctor; message?: string }> => {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
+    let accessToken;
+    if (typeof window === "undefined") {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      accessToken = cookieStore.get("accessToken")?.value;
+    }
 
     const response = await fetch(`${API_BASE_URL}/doctors/${id}`, {
       method: "GET",
@@ -64,18 +79,77 @@ export const getDoctorById = async (
         "Content-Type": "application/json",
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
-      next: { revalidate: 60 }, // Cache individual doctor for 60 seconds
+      next: { revalidate: 60 },
     });
 
     const data = await response.json();
 
     if (!response.ok || !data.success) {
-      return { success: false, message: data.message || "Failed to fetch doctor details" };
+      return {
+        success: false,
+        message: data.message || "Failed to fetch doctor details",
+      };
     }
 
     return { success: true, data: data.data };
   } catch (error: any) {
     console.error("Fetch Doctor Error:", error);
-    return { success: false, message: "Internal server error fetching doctor details" };
+    return {
+      success: false,
+      message: "Internal server error fetching doctor details",
+    };
+  }
+};
+
+export const createDoctor = async (
+  payload: any,
+): Promise<{ success: boolean; data?: any; message?: string }> => {
+  try {
+    // We use httpClient so it works smoothly on the client and handles tokens automatically via interceptors
+    const response = await httpClient.post("/users/create-doctor", payload);
+    return response as any;
+  } catch (error: any) {
+    console.error("Create Doctor Error:", error);
+    return {
+      success: false,
+      message:
+        error?.response?.data?.message ||
+        "Internal server error creating doctor",
+    };
+  }
+};
+
+export const updateDoctor = async (
+  id: string,
+  payload: any,
+): Promise<{ success: boolean; data?: any; message?: string }> => {
+  try {
+    const response = await httpClient.patch(`/doctors/${id}`, payload);
+    return response as any;
+  } catch (error: any) {
+    console.error("Update Doctor Error:", error);
+    return {
+      success: false,
+      message:
+        error?.response?.data?.message ||
+        "Internal server error updating doctor",
+    };
+  }
+};
+
+export const deleteDoctor = async (
+  id: string,
+): Promise<{ success: boolean; data?: any; message?: string }> => {
+  try {
+    const response = await httpClient.delete(`/doctors/${id}`);
+    return response as any;
+  } catch (error: any) {
+    console.error("Delete Doctor Error:", error);
+    return {
+      success: false,
+      message:
+        error?.response?.data?.message ||
+        "Internal server error deleting doctor",
+    };
   }
 };

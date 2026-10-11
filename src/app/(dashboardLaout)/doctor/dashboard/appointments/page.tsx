@@ -1,4 +1,4 @@
-export const DoctorAppointmentsPage = () => {
+export default function DoctorAppointmentsPage() {
     return (
         <div>DoctorAppointmentsPage</div>
     )
