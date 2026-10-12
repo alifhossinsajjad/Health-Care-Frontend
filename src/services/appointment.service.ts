@@ -61,10 +61,20 @@ export const bookAppointment = async (
   }
 };
 
-export const getMyAppointments = async (): Promise<{
+export const getMyAppointments = async (params?: {
+  page?: number;
+  limit?: number;
+  status?: string;
+}): Promise<{
   success: boolean;
   message?: string;
   data?: IAppointment[];
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage?: number;
+  };
 }> => {
   try {
     const accessToken = await getAuthToken();
@@ -77,14 +87,24 @@ export const getMyAppointments = async (): Promise<{
       };
     }
 
-    const response = await fetch(`${API_BASE_URL}/appointments/my-appointments`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      next: { revalidate: 0 },
-    });
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.status) queryParams.append("status", params.status);
+
+    const queryString = queryParams.toString() ? `?${queryParams.toString()}` : "";
+
+    const response = await fetch(
+      `${API_BASE_URL}/appointments/my-appointments${queryString}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        next: { revalidate: 0 },
+      }
+    );
 
     const data = await response.json();
 
@@ -100,6 +120,7 @@ export const getMyAppointments = async (): Promise<{
       success: true,
       message: data.message,
       data: data.data || [],
+      meta: data.meta,
     };
   } catch (error: any) {
     console.error("Fetch Appointments Error:", error);

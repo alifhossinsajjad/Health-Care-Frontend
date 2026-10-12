@@ -9,12 +9,32 @@ import { Button } from "@/src/components/ui/button";
 interface PayNowButtonProps {
   appointmentId: string;
   fee?: number;
+  createdAt?: string;
+  durationMinutes?: number;
 }
 
-export function PayNowButton({ appointmentId, fee }: PayNowButtonProps) {
+export function PayNowButton({
+  appointmentId,
+  fee,
+  createdAt,
+  durationMinutes = 30,
+}: PayNowButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
+  // Check if pay later window is expired
+  const isExpired = Boolean(
+    createdAt &&
+      new Date(createdAt).getTime() + durationMinutes * 60 * 1000 <= Date.now()
+  );
+
   const handlePay = async () => {
+    if (isExpired) {
+      toast.error(
+        "Payment window has expired for this booking. Please book a new slot."
+      );
+      return;
+    }
+
     try {
       setIsLoading(true);
       const res = await initiatePayment(appointmentId);
@@ -31,6 +51,19 @@ export function PayNowButton({ appointmentId, fee }: PayNowButtonProps) {
       setIsLoading(false);
     }
   };
+
+  if (isExpired) {
+    return (
+      <Button
+        size="sm"
+        disabled
+        title="Payment window has expired (30m limit)"
+        className="rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 font-medium text-xs cursor-not-allowed border border-zinc-200 dark:border-zinc-700"
+      >
+        <span>Expired</span>
+      </Button>
+    );
+  }
 
   return (
     <Button
