@@ -1,4 +1,5 @@
 import { API_BASE_URL, httpClient } from "@/src/lib/axiosInstance";
+import { getAuthToken } from "@/src/utils/auth-token";
 import {
   ISchedule,
   IScheduleFilters,
@@ -15,12 +16,7 @@ export const getAllSchedules = async (
   message?: string;
 }> => {
   try {
-    let accessToken;
-    if (typeof window === "undefined") {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      accessToken = cookieStore.get("accessToken")?.value;
-    }
+    const accessToken = await getAuthToken();
 
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
@@ -38,6 +34,7 @@ export const getAllSchedules = async (
         "Content-Type": "application/json",
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
+      credentials: "include",
       next: { revalidate: 0 },
     });
 
@@ -74,12 +71,7 @@ export const getScheduleById = async (
   message?: string;
 }> => {
   try {
-    let accessToken;
-    if (typeof window === "undefined") {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      accessToken = cookieStore.get("accessToken")?.value;
-    }
+    const accessToken = await getAuthToken();
 
     const response = await fetch(`${API_BASE_URL}/schedules/${id}`, {
       method: "GET",
@@ -87,6 +79,7 @@ export const getScheduleById = async (
         "Content-Type": "application/json",
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
+      credentials: "include",
       next: { revalidate: 0 },
     });
 

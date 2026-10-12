@@ -1,7 +1,3 @@
-import React from 'react'
+import PaymentCancelPage from "../../(dashboardRouteGroup)/dashboard/payment/cancel/page";
 
-export default function PaymentCancelPage() {
-  return (
-    <div>PaymentCancelPage</div>
-  )
-}
+export default PaymentCancelPage;

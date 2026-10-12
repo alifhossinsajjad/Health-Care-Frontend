@@ -1,6 +1,8 @@
 import React from "react";
 import { getDoctorById } from "@/src/services/doctor.service";
+import { getAllDoctorSchedules } from "@/src/services/doctor-schedule.service";
 import { DoctorAvatar } from "@/src/components/shared/DoctorAvatar";
+import { DoctorScheduleBooking } from "@/src/components/modules/doctors/DoctorScheduleBooking";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { 
@@ -12,10 +14,10 @@ import {
   Mail, 
   Phone, 
   Calendar, 
-  Clock, 
-  CreditCard 
+  CreditCard,
+  ShieldAlert,
+  ArrowDown
 } from "lucide-react";
-import Image from "next/image";
 
 interface DoctorDetailsProps {
   params: Promise<{ id: string }>;
@@ -40,6 +42,17 @@ export default async function DoctorDetailsPage({ params }: DoctorDetailsProps) 
   if (!success || !doctor) {
     notFound();
   }
+
+  // Fetch all unbooked and upcoming schedules for this doctor
+  const schedulesRes = await getAllDoctorSchedules({
+    doctorId: doctor.id,
+    isBooked: false,
+    startDateTime: new Date().toISOString(),
+    limit: 100,
+  });
+
+  const schedules = schedulesRes.success && schedulesRes.data ? schedulesRes.data : [];
+  const isDoctorBlocked = doctor.user?.status === "BLOCKED" || Boolean(doctor.isDeleted);
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-6xl">
@@ -101,16 +114,38 @@ export default async function DoctorDetailsPage({ params }: DoctorDetailsProps) 
               </div>
             </div>
 
-            {/* Book Button */}
-            <button className="w-full py-3.5 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold transition-transform active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20">
-              <Calendar className="w-5 h-5" />
-              Book Appointment
-            </button>
+            {/* Quick CTA to Schedule Section */}
+            {isDoctorBlocked ? (
+              <button 
+                disabled 
+                className="w-full py-3.5 px-6 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 font-bold flex items-center justify-center gap-2 cursor-not-allowed border border-amber-200 dark:border-amber-900/50"
+              >
+                <ShieldAlert className="w-5 h-5" />
+                Doctor Unavailable
+              </button>
+            ) : (
+              <a 
+                href="#booking-section"
+                className="w-full py-3.5 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all hover:shadow-lg hover:shadow-blue-600/25 flex items-center justify-center gap-2 group"
+              >
+                <Calendar className="w-5 h-5" />
+                <span>Select Appointment Slot</span>
+                <ArrowDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+              </a>
+            )}
           </div>
         </div>
 
-        {/* Right Column: Detailed Info */}
+        {/* Right Column: Detailed Info & Interactive Schedule Booking */}
         <div className="lg:col-span-2 flex flex-col gap-6">
+          {/* Interactive Schedule Booking Section */}
+          <div id="booking-section">
+            <DoctorScheduleBooking 
+              doctor={doctor} 
+              initialSchedules={schedules} 
+            />
+          </div>
+
           {/* About & Qualification */}
           <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm">
             <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-6 flex items-center gap-2">

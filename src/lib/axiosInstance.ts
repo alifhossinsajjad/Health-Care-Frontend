@@ -56,6 +56,10 @@ axiosInstance.interceptors.request.use(
     } else {
       // Client-side Environment (Browser)
       token = localStorage.getItem("accessToken");
+      if (!token && typeof document !== "undefined") {
+        const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]+)/);
+        if (match) token = match[1];
+      }
     }
 
     // Attach token to headers

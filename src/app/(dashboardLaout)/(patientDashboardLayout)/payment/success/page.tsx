@@ -1,7 +1,3 @@
-import React from 'react'
+import PaymentSuccessPage from "../../(dashboardRouteGroup)/dashboard/payment/payment-success/page";
 
-export default function PaymentSuccessPage() {
-  return (
-    <div>SuccessPage</div>
-  )
-}
+export default PaymentSuccessPage;

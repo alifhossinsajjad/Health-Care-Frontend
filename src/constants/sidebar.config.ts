@@ -73,6 +73,11 @@ export const doctorNavItems: NavSection[] = [
         icon: Calendar,
       },
       {
+        title: "Doctor Schedules",
+        href: "/doctor/dashboard/doctor-schedules",
+        icon: CalendarClock,
+      },
+      {
         title: "My Schedules",
         href: "/doctor/dashboard/my-schedules",
         icon: Clock,
@@ -163,6 +168,11 @@ export const patientNavItems: NavSection[] = [
         title: "My Appointments",
         href: "/dashboard/my-appointments",
         icon: Calendar,
+      },
+      {
+        title: "Doctor Schedules",
+        href: "/dashboard/doctor-schedules",
+        icon: CalendarClock,
       },
       {
         title: "Book Appointment",
