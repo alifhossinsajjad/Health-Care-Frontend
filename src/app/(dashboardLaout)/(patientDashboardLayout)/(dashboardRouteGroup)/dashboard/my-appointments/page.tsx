@@ -18,15 +18,26 @@ import { DoctorAvatar } from "@/src/components/shared/DoctorAvatar";
 import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
 import { PayNowButton } from "@/src/components/modules/appointments/PayNowButton";
+import { PayLaterCountdown } from "@/src/components/modules/appointments/PayLaterCountdown";
+import { AppPagination } from "@/src/components/shared/AppPagination";
 
 export const metadata = {
   title: "My Appointments | Health Care",
   description: "View and manage all your scheduled healthcare appointments.",
 };
 
-export default async function MyAppointmentsPage() {
-  const res = await getMyAppointments();
+interface MyAppointmentsPageProps {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}
+
+export default async function MyAppointmentsPage({ searchParams }: MyAppointmentsPageProps) {
+  const resolvedParams = await searchParams;
+  const page = Number(resolvedParams?.page) || 1;
+  const limit = Number(resolvedParams?.limit) || 6;
+
+  const res = await getMyAppointments({ page, limit });
   const appointments = res.success && res.data ? res.data : [];
+  const meta = res.meta;
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
@@ -72,7 +83,8 @@ export default async function MyAppointmentsPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {appointments.map((appt) => {
             const doctor = appt.doctor;
             const schedule = appt.schedule;
@@ -157,6 +169,16 @@ export default async function MyAppointmentsPage() {
                       <span>{formattedTime}</span>
                     </div>
                   </div>
+
+                  {/* Pay Later Live Expiry Countdown */}
+                  {!isPaid && isScheduled && appt.createdAt && (
+                    <div className="mt-3">
+                      <PayLaterCountdown
+                        createdAt={appt.createdAt}
+                        durationMinutes={30}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Card Bottom: Payment & Action */}
@@ -190,6 +212,8 @@ export default async function MyAppointmentsPage() {
                       <PayNowButton
                         appointmentId={appt.id}
                         fee={appt.payment?.amount || doctor?.appointmentFee}
+                        createdAt={appt.createdAt}
+                        durationMinutes={30}
                       />
                     )}
 
@@ -232,6 +256,14 @@ export default async function MyAppointmentsPage() {
             );
           })}
         </div>
+
+        {/* Pagination Footer */}
+        {meta && meta.total > 0 && (
+          <div className="pt-2">
+            <AppPagination meta={meta} />
+          </div>
+        )}
+      </>
       )}
     </div>
   );
