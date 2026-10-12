@@ -1,4 +1,5 @@
 import { API_BASE_URL, httpClient } from "@/src/lib/axiosInstance";
+import { getAuthToken } from "@/src/utils/auth-token";
 import { IDoctor, IDoctorFilters } from "@/src/types/doctor.type";
 
 interface IMeta {
@@ -16,12 +17,7 @@ export const getAllDoctors = async (
   message?: string;
 }> => {
   try {
-    let accessToken;
-    if (typeof window === "undefined") {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      accessToken = cookieStore.get("accessToken")?.value;
-    }
+    const accessToken = await getAuthToken();
 
     // Convert filters object into URLSearchParams
     const params = new URLSearchParams();
@@ -40,6 +36,7 @@ export const getAllDoctors = async (
         "Content-Type": "application/json",
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
+      credentials: "include",
       next: { revalidate: 0 },
     });
 
@@ -66,12 +63,7 @@ export const getDoctorById = async (
   id: string,
 ): Promise<{ success: boolean; data?: IDoctor; message?: string }> => {
   try {
-    let accessToken;
-    if (typeof window === "undefined") {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      accessToken = cookieStore.get("accessToken")?.value;
-    }
+    const accessToken = await getAuthToken();
 
     const response = await fetch(`${API_BASE_URL}/doctors/${id}`, {
       method: "GET",
@@ -79,6 +71,7 @@ export const getDoctorById = async (
         "Content-Type": "application/json",
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
+      credentials: "include",
       next: { revalidate: 60 },
     });
 

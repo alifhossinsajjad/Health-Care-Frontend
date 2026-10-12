@@ -1,18 +1,18 @@
 import { API_BASE_URL } from "@/src/lib/axiosInstance";
-import { cookies } from "next/headers";
+import { getAuthToken } from "@/src/utils/auth-token";
 import { DashboardStats } from "@/src/types/dashboard.types";
 
 export const getDashboardStats = async (): Promise<{ success: boolean; data?: DashboardStats; message?: string }> => {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
+    const accessToken = await getAuthToken();
 
     const response = await fetch(`${API_BASE_URL}/stats`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
+      credentials: "include",
       // Cache settings for Next.js 15: 
       // Option 1: "no-store" for always real-time without caching.
       // Option 2: { next: { revalidate: 0 } }
