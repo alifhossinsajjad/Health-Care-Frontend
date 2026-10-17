@@ -1,11 +1,14 @@
 import axios from "axios";
 import { ApiResponse } from "@/src/types/api.type";
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+export const API_BASE_URL =
+  typeof window === "undefined" && process.env.INTERNAL_API_BASE_URL
+    ? process.env.INTERNAL_API_BASE_URL
+    : process.env.NEXT_PUBLIC_API_BASE_URL;
 
 if (!API_BASE_URL) {
   throw new Error(
-    "NEXT_PUBLIC_API_BASE_URL is not defined in the environment variables.",
+    "API base URL is not defined in the environment variables."
   );
 }
 

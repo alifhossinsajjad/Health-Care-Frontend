@@ -67,9 +67,14 @@ const getUserInfo = async (token: string) => {
 
 async function refreshTokenMiddleware(refreshToken: string): Promise<string | null> {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh-token`,
-      {
+    const apiBase =
+      process.env.INTERNAL_API_BASE_URL ||
+      process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!apiBase) {
+      console.error("API base URL is not defined in environment variables.");
+      return null;
+    }
+    const res = await fetch(`${apiBase}/auth/refresh-token`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
