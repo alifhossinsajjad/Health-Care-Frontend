@@ -24,28 +24,29 @@ Engineered with high-performance production standards, the frontend features **N
 
 ```mermaid
 flowchart TD
-    subgraph Client_Side ["Client Layer (Browser)"]
+    subgraph Client_Layer ["Client Layer (Browser)"]
         User["Patient / Doctor / Admin"]
-        UI["Next.js 16 Interactive UI"]
+        UI["Next.js 16 Web Application"]
     end
 
-    subgraph Docker_Network ["Docker Internal Network (healthcare_network)"]
-        Frontend["healthcare_frontend :3000\n(Next.js Standalone Runner)"]
-        BackendAPI["healthcare_api :5000\n(Express + TypeScript + Prisma)"]
-        RedisCache["healthcare_redis :6379\n(Cache & Session Store)"]
+    subgraph Container_Cluster ["Containerized Services"]
+        Frontend["Frontend Service<br/>(Next.js Standalone Runner)"]
+        BackendAPI["Backend API Gateway<br/>(Express, TypeScript, Prisma)"]
+        RedisCache["Redis Cache<br/>(Session & Rate Limiting)"]
     end
 
-    subgraph External_Services ["External Cloud Services"]
-        NeonDB[("Neon PostgreSQL\n(AWS Cloud DB)")]
-        StripeGateway["Stripe Checkout &\nWebhook Processing"]
-        CloudinaryCDN["Cloudinary Secured\nPDF & Image Delivery"]
+    subgraph Cloud_Infrastructure ["Managed Cloud Infrastructure"]
+        PostgresDB[("PostgreSQL Database<br/>(Cloud Storage)")]
+        StripeGateway["Stripe Payments<br/>(Secure Checkout & Webhooks)"]
+        CloudinaryCDN["Cloudinary Storage<br/>(Prescriptions & Invoices)"]
     end
 
-    User -->|HTTPS:3000| Frontend
-    User -->|Client-Side API Requests| BackendAPI
-    Frontend -->|SSR Internal DNS Resolution\nINTERNAL_API_BASE_URL| BackendAPI
+    User --> UI
+    UI -->|HTTPS Request| Frontend
+    UI -->|Client API Calls| BackendAPI
+    Frontend -->|SSR Internal DNS Resolution| BackendAPI
     BackendAPI <--> RedisCache
-    BackendAPI <--> NeonDB
+    BackendAPI <--> PostgresDB
     BackendAPI <--> StripeGateway
     BackendAPI <--> CloudinaryCDN
 ```
@@ -141,15 +142,21 @@ We are actively expanding this platform into a comprehensive AI-augmented health
 ---
 
 ## ⚙️ Environment Configuration
+ 
+Configure your local environment by creating a `.env` file based on the template:
 
-Create a `.env` file in the project root:
+```bash
+cp .env.example .env
+```
+
+Add your service endpoints:
 
 ```env
-# Client-Facing Public API URL (Accessible from User's Browser)
-NEXT_PUBLIC_API_BASE_URL=http://localhost:5000/api/v1
+# Client-Facing Public API Gateway (Accessible from User's Browser)
+NEXT_PUBLIC_API_BASE_URL=https://api.yourdomain.com/api/v1
 
-# Internal Docker Network API URL (For Server-Side Rendering within Docker)
-INTERNAL_API_BASE_URL=http://healthcare_api:5000/api/v1
+# Internal Docker Network Service URL (Optional: For Server-Side Rendering within Docker)
+INTERNAL_API_BASE_URL=http://backend_service:port/api/v1
 ```
 
 ---
