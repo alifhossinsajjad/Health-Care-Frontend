@@ -30,10 +30,8 @@ export const getAuthToken = async (): Promise<string | undefined> => {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
     return cookieStore.get("accessToken")?.value;
-  } catch (error: any) {
-    if (error?.digest === "DYNAMIC_SERVER_USAGE") {
-      throw error;
-    }
+  } catch {
+    // Outside request context (e.g. static prerendering / build time), cookies are unavailable
     return undefined;
   }
 };

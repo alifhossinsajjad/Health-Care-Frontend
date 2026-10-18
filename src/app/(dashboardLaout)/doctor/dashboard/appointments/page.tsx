@@ -14,8 +14,6 @@ import {
 import { getMyAppointments } from "@/src/services/appointment.service";
 import { Button } from "@/src/components/ui/button";
 
-export const dynamic = "force-dynamic";
-
 export const metadata = {
   title: "Patient Appointments | Doctor Dashboard",
   description: "View and manage consultations booked by patients.",

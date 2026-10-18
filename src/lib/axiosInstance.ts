@@ -53,10 +53,9 @@ axiosInstance.interceptors.request.use(
         token = cookieStore.get("accessToken")?.value;
 
         // Optional: Token Refresh Logic on Server can be added here
-      } catch (error: any) {
-        if (error?.digest === "DYNAMIC_SERVER_USAGE") {
-          throw error;
-        }
+      } catch {
+        // Outside request context (e.g. static prerendering / build time), cookies are unavailable
+        token = null;
       }
     } else {
       // Client-side Environment (Browser)

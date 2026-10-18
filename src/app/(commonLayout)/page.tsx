@@ -10,8 +10,6 @@ import { HowItWorksSection } from "@/src/components/home/HowItWorksSection";
 import { TestimonialsSection } from "@/src/components/home/TestimonialsSection";
 import { CtaBanner } from "@/src/components/home/CtaBanner";
 
-export const dynamic = "force-dynamic";
-
 export const metadata = {
   title: "HealthCare | World-Class Telehealth & Hospital Appointments",
   description:
