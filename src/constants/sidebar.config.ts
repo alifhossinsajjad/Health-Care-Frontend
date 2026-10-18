@@ -15,6 +15,8 @@ import {
   CreditCard,
   ClipboardList,
   Activity,
+  Terminal,
+  Layers,
   LucideIcon,
 } from "lucide-react";
 
@@ -155,6 +157,21 @@ export const adminNavItems: NavSection[] = [
         title: "Reviews",
         href: "/admin/dashboard/reviews-management",
         icon: Star,
+      },
+    ],
+  },
+  {
+    title: "System & Monitoring",
+    items: [
+      {
+        title: "Request Logs",
+        href: "/admin/dashboard/request-logs",
+        icon: Terminal,
+      },
+      {
+        title: "Background Queues",
+        href: "/admin/dashboard/queues",
+        icon: Layers,
       },
     ],
   },
