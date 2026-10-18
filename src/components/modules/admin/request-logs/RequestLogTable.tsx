@@ -80,14 +80,19 @@ export function RequestLogTable({ logs }: RequestLogTableProps) {
           </thead>
           <tbody className="divide-y divide-zinc-200/70 dark:divide-zinc-800/70">
             {logs.map((log) => {
-              const formattedTime = log.createdAt
-                ? format(parseISO(log.createdAt), "MMM d, HH:mm:ss")
+              const rawTime = log.timestamp || log.createdAt;
+              const formattedTime = rawTime
+                ? format(parseISO(rawTime), "MMM d, HH:mm:ss")
                 : "Just now";
 
               const isMobile =
                 log.device?.toLowerCase().includes("phone") ||
                 log.device?.toLowerCase().includes("android") ||
                 log.device?.toLowerCase().includes("mobile");
+
+              const hasAuthUser = Boolean(
+                log.userRole || log.userId || log.user?.email || log.user?.role,
+              );
 
               return (
                 <tr
@@ -157,11 +162,28 @@ export function RequestLogTable({ logs }: RequestLogTableProps) {
 
                   {/* User */}
                   <td className="py-3.5 px-4 whitespace-nowrap">
-                    {log.user?.email ? (
-                      <div className="flex items-center gap-1 text-xs font-medium text-zinc-800 dark:text-zinc-200">
-                        <User className="w-3.5 h-3.5 text-blue-500" />
-                        <span className="truncate max-w-[140px]" title={log.user.email}>
-                          {log.user.email}
+                    {hasAuthUser ? (
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                          <User className="w-3.5 h-3.5 text-indigo-500" />
+                          <span
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase border ${
+                              (log.userRole || log.user?.role) === "SUPER_ADMIN"
+                                ? "bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border-purple-200 dark:border-purple-800"
+                                : (log.userRole || log.user?.role) === "ADMIN"
+                                  ? "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+                                  : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                            }`}
+                          >
+                            {log.userRole || log.user?.role || "USER"}
+                          </span>
+                        </div>
+                        <span
+                          className="font-mono text-[11px] text-zinc-500 dark:text-zinc-400 truncate max-w-[140px]"
+                          title={log.user?.email || log.userId || ""}
+                        >
+                          {log.user?.email ||
+                            (log.userId ? `${log.userId.slice(0, 12)}...` : "")}
                         </span>
                       </div>
                     ) : (
@@ -172,7 +194,7 @@ export function RequestLogTable({ logs }: RequestLogTableProps) {
                   </td>
 
                   {/* Timestamp */}
-                  <td className="py-3.5 px-4 whitespace-nowrap text-xs text-zinc-500 dark:text-zinc-400">
+                  <td className="py-3.5 px-4 whitespace-nowrap text-xs text-zinc-500 dark:text-zinc-400 font-mono">
                     {formattedTime}
                   </td>
 

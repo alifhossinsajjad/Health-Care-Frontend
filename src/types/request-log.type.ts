@@ -20,9 +20,13 @@ export interface IRequestLog {
   duration?: string | number;
   device?: string;
   browser?: string;
+  userAgent?: string;
   ip?: string;
+  userId?: string;
+  userRole?: string;
   user?: IRequestLogUser | null;
-  createdAt: string;
+  timestamp?: string;
+  createdAt?: string;
 }
 
 export interface IRequestLogFilters {
