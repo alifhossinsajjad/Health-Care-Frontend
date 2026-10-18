@@ -22,7 +22,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden flex flex-col justify-between p-6 rounded-3xl bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-zinc-300 dark:hover:border-zinc-700 min-h-[160px]",
+        "group relative overflow-hidden flex flex-col justify-between p-4 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-zinc-300 dark:hover:border-zinc-700 min-h-[140px] sm:min-h-[160px]",
         className,
       )}
     >
@@ -35,12 +35,12 @@ export function StatCard({
         )}
       />
 
-      <div className="flex items-start justify-between relative z-10">
-        <div className="flex flex-col gap-1">
-          <p className="text-sm font-bold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase">
+      <div className="flex items-start justify-between relative z-10 gap-2">
+        <div className="flex flex-col gap-1 min-w-0">
+          <p className="text-xs sm:text-sm font-bold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase truncate">
             {title}
           </p>
-          <h3 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-zinc-50 mt-1">
+          <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tighter text-zinc-900 dark:text-zinc-50 mt-1">
             {value}
           </h3>
         </div>

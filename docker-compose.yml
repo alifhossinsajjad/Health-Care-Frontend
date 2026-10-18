@@ -13,6 +13,7 @@ services:
       - .env
     environment:
       - NODE_ENV=production
+      - IS_DOCKER=true
       - INTERNAL_API_BASE_URL=${INTERNAL_API_BASE_URL}
     networks:
       - healthcare_network
