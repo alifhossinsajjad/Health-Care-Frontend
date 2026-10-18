@@ -5,18 +5,19 @@
   <img src="https://img.shields.io/badge/React-19.2.8-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS v4" />
-  <img src="https://img.shields.io/badge/Docker-Production_Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/Docker-Standalone_Container-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/GitHub_Actions-CI%2FCD_Automated-2088FF?style=for-the-badge&logo=github-actions&logoColor=white" alt="GitHub Actions CI/CD" />
+  <img src="https://img.shields.io/badge/Nginx-Reverse_Proxy_Gateway-009639?style=for-the-badge&logo=nginx&logoColor=white" alt="Nginx Gateway" />
   <img src="https://img.shields.io/badge/Stripe-Secured_Checkout-635BFF?style=for-the-badge&logo=stripe&logoColor=white" alt="Stripe" />
-  <img src="https://img.shields.io/badge/HIPAA-Compliance_Architecture-10B981?style=for-the-badge&logo=shield&logoColor=white" alt="HIPAA Ready" />
 </p>
 
 ---
 
 ## 📌 Executive Summary
 
-**HealthCare** is an enterprise-grade digital health and clinical consultation web platform designed to support millions of patients, board-certified doctors, and hospital administrators. Built with **Next.js 16 (App Router)** and **React 19**, the platform eliminates administrative friction by uniting specialist discovery, real-time schedule locking, dual-track payment systems (Stripe + Automated Pay Later), secure PDF invoice delivery, and end-to-end encrypted telehealth records.
+**HealthCare** is an enterprise-grade digital health and clinical consultation web platform designed to support millions of patients, board-certified doctors, and hospital administrators. Built with **Next.js 16 (App Router)** and **React 19**, the platform unites specialist discovery, real-time schedule locking, dual-track payment systems (Stripe + Automated Pay Later with live expiration countdown), secure Cloudinary PDF invoice delivery, and end-to-end encrypted telehealth records.
 
-Engineered with high-performance production standards, the frontend features **Next.js Standalone Containerization** (reducing image size from 1.5 GB down to **87 MB**), zero-conflict booking algorithms, and dual-network routing for server-side rendering (SSR).
+Engineered with high-availability cloud standards, the frontend features **Next.js Standalone Containerization** (reducing image size down to **87 MB**), a unified **Nginx Single Gateway Reverse Proxy**, full **GitHub Actions CI/CD Automation**, and dedicated **Admin Observability & BullMQ Queue Monitoring**.
 
 ---
 
@@ -26,36 +27,70 @@ Engineered with high-performance production standards, the frontend features **N
 flowchart TD
     subgraph Client_Layer ["Client Layer (Browser)"]
         User["Patient / Doctor / Admin"]
-        UI["Next.js 16 Web Application"]
+        Browser["Next.js 16 Client App (Port 3000)"]
     end
 
-    subgraph Container_Cluster ["Containerized Services"]
-        Frontend["Frontend Service<br/>(Next.js Standalone Runner)"]
-        BackendAPI["Backend API Gateway<br/>(Express, TypeScript, Prisma)"]
-        RedisCache["Redis Cache<br/>(Session & Rate Limiting)"]
+    subgraph Gateway_Layer ["Nginx High-Performance Gateway (Port 80)"]
+        NginxGateway["Nginx Reverse Proxy & Load Balancer<br/>(Rate Limiting, Gzip, SSL Termination)"]
     end
 
-    subgraph Cloud_Infrastructure ["Managed Cloud Infrastructure"]
-        PostgresDB[("PostgreSQL Database<br/>(Cloud Storage)")]
-        StripeGateway["Stripe Payments<br/>(Secure Checkout & Webhooks)"]
-        CloudinaryCDN["Cloudinary Storage<br/>(Prescriptions & Invoices)"]
+    subgraph CI_CD ["Automated CI/CD Pipeline (GitHub Actions)"]
+        CI["CI: Lint + TypeCheck + Build Verification"]
+        CD["CD: Automated Zero-Downtime VPS Deployment"]
     end
 
-    User --> UI
-    UI -->|HTTPS Request| Frontend
-    UI -->|Client API Calls| BackendAPI
-    Frontend -->|SSR Internal DNS Resolution| BackendAPI
-    BackendAPI <--> RedisCache
-    BackendAPI <--> PostgresDB
-    BackendAPI <--> StripeGateway
-    BackendAPI <--> CloudinaryCDN
+    subgraph Container_Cluster ["Containerized Microservices Cluster"]
+        FrontendContainer["healthcare_frontend<br/>(Next.js Standalone Runner)"]
+        BackendCluster["Backend API Replicas<br/>(Express 5, TypeScript, Prisma)"]
+        RedisQueues["healthcare_redis<br/>(BullMQ Worker Queues & Rate Limits)"]
+    end
+
+    subgraph Cloud_Services ["Managed Cloud Infrastructure"]
+        PostgresDB[("PostgreSQL Database<br/>(Clinical & Patient Records)")]
+        StripeGateway["Stripe Payments<br/>(Checkout & Webhook Events)"]
+        CloudinaryCDN["Cloudinary Storage<br/>(Encrypted Medical Reports & Invoices)"]
+    end
+
+    User --> Browser
+    Browser -->|Direct Web Traffic| FrontendContainer
+    Browser -->|Unified API Gateway| NginxGateway
+    FrontendContainer -->|Next.js SSR & Rewrite Proxy| NginxGateway
+    NginxGateway -->|Load-Balanced Requests| BackendCluster
+    BackendCluster <--> RedisQueues
+    BackendCluster <--> PostgresDB
+    BackendCluster <--> StripeGateway
+    BackendCluster <--> CloudinaryCDN
+    CI --> CD -->|Deploy via SSH| FrontendContainer
 ```
+
+---
+
+## 🚀 Automated CI/CD Pipeline (GitHub Actions)
+
+The repository implements a robust, continuous integration and continuous deployment (CI/CD) lifecycle configured via **GitHub Actions**:
+
+### 1. Continuous Integration (`.github/workflows/ci.yml`)
+- **Triggers:** Every push to `main`, `dev`, or `feature/**` branches, and on Pull Requests targeting `main` or `dev`.
+- **Concurrency Control:** Cancels superseded in-progress builds to conserve runner compute minutes.
+- **Automated Quality Checks:**
+  1. **Clean Installation:** `npm ci --legacy-peer-deps` using automated Node.js v20 npm caching.
+  2. **ESLint Code Quality Audit:** Validates clean syntax, React Compiler standards, and Next.js best practices (`npm run lint`).
+  3. **Strict Type-Checking:** Runs `npx tsc --noEmit` across all 48 App Router routes and modules to prevent runtime type errors.
+  4. **Standalone Production Build Verification:** Executes `npm run build` with mock gateway variables to guarantee zero build breakages.
+
+### 2. Continuous Deployment (`.github/workflows/deploy.yml`)
+- **Triggers:** Automatically on push to `main` branch (or manual dispatch).
+- **Execution Workflow:**
+  1. Secure authentication via encrypted SSH (`appleboy/ssh-action@v1.0.3`) into the production Linux VPS.
+  2. Executes repository sync (`git pull origin main`).
+  3. Rebuilds and launches the Next.js standalone container (`docker compose up -d --build --remove-orphans`).
+  4. Automatic garbage collection of dangling layers (`docker image prune -f`) to maintain lean server storage.
 
 ---
 
 ## ✨ Core Features & Architectural Highlights
 
-### 1. 🌟 High-Conversion Enterprise Landing Page
+### 1. 🌟 High-Conversion Clinical Landing Page
 - **Interactive Specialist Search Bar:** Embedded search with real-time specialty filtering and auto-suggestion directly linked to `/doctors`.
 - **Dynamic Clinical Departments:** Dynamic data-fetching of medical departments (Cardiology, Neurology, Pediatrics, Orthopedics, Ophthalmology, etc.).
 - **Live Doctor Showcase:** Server-rendered doctor cards featuring verified credentials, designation, hospital affiliation, consultation fee, and direct booking CTA.
@@ -75,13 +110,23 @@ flowchart TD
   - **Auto-Expiration Protection:** Expired bookings automatically deactivate the "Pay Online" button to avoid conflict and keep slot availability clean.
 - **Official PDF Invoice Delivery:** Generates PDF invoices stored securely in Cloudinary with dedicated delivery permissions and browser preview.
 
-### 4. 📊 Patient & Doctor Dashboards
+### 4. 🛡️ Admin Telemetry & Real-Time Monitoring Ecosystem
+- **Request Logs & HTTP Telemetry (`/admin/dashboard/request-logs`):**
+  - High-throughput audit buffer tracking request path, HTTP method badge, response status codes, latencies, IP addresses, and user-agent devices.
+  - Role-based user tracking: Displays authenticated user role badges (`SUPER_ADMIN`, `ADMIN`) and user IDs alongside anonymous public traffic.
+  - Fast search, method/status code filtering, and instant audit log cleanup.
+- **Background Job Queues Dashboard (`/admin/dashboard/queues`):**
+  - Embedded **BullMQ & Bull-Board** visual monitoring dashboard.
+  - Real-time visibility into active workers: Email Notification Queue, Stripe Webhook Processing, and Schedule Auto-Release Cron.
+  - Same-origin reverse proxy (`next.config.ts` rewrites) eliminating CORS and `X-Frame-Options: SAMEORIGIN` restrictions while automatically relaying authorization cookies.
+
+### 5. 📊 Patient & Doctor Clinical Portals
 - **Server-Side Pagination (`AppPagination.tsx`):** Fast URL-driven search parameter pagination (`?page=1&limit=6`) with total records metadata counters.
 - **Appointments Management:** Distinct status badges for `SCHEDULED`, `COMPLETED`, and `CANCELED` consultations.
 - **Digital Health Records & Prescriptions:** Direct access to medical records, prescriptions, and official receipts.
 
-### 5. 🛡️ Role-Based Access Control (RBAC) & Next.js Middleware
-- Strict multi-role protection (`PATIENT`, `DOCTOR`, `ADMIN`).
+### 6. 🔐 Role-Based Access Control (RBAC) & Next.js Middleware
+- Strict multi-role protection (`PATIENT`, `DOCTOR`, `ADMIN`, `SUPER_ADMIN`).
 - Next.js edge middleware inspecting HttpOnly JWT tokens, silent refresh-token rotation, and instant unauthenticated redirects.
 
 ---
@@ -93,8 +138,8 @@ The project utilizes a 4-stage multi-stage Docker build optimized for high-secur
 | Stage | Image | Purpose |
 | :--- | :--- | :--- |
 | **1. Base** | `node:22-alpine` | Installs `libc6-compat` for Alpine Linux native binary compatibility |
-| **2. Deps** | `node:22-alpine` | Caches package manifests and runs clean dependency installation |
-| **3. Builder** | `node:22-alpine` | Executes `output: "standalone"` Next.js build with baked client environment variables |
+| **2. Deps** | `node:22-alpine` | Caches package manifests and runs clean dependency installation (`npm ci --legacy-peer-deps`) |
+| **3. Builder** | `node:22-alpine` | Executes `output: "standalone"` Next.js build with baked client environment variables & proxy targets |
 | **4. Runner** | `node:22-alpine` | Non-root system user (`nextjs:nodejs`), minimal image size, sub-second boot time |
 
 ### 🚀 Image Optimization Result:
@@ -134,10 +179,11 @@ We are actively expanding this platform into a comprehensive AI-augmented health
 | **Component System**| [Radix UI](https://www.radix-ui.com/), [Shadcn UI](https://ui.shadcn.com/) |
 | **Icons** | [Lucide React](https://lucide.dev/) |
 | **Networking** | [Axios](https://axios-http.com/) & Native Fetch with dual-network SSR/CSR resolution |
-| **Date & Time** | [date-fns](https://date-fns.org/) |
+| **Monitoring & Queues**| [Bull-Board](https://github.com/felixmosh/bull-board) (BullMQ Visual UI), Real-time HTTP Telemetry |
+| **DevOps & CI/CD** | [Docker](https://www.docker.com/) (Standalone), [GitHub Actions](https://github.com/features/actions) |
+| **Reverse Proxy** | [Nginx](https://nginx.org/) Unified Single Gateway |
 | **Payments** | [Stripe](https://stripe.com/) Checkout SDK |
 | **Storage & Assets** | [Cloudinary](https://cloudinary.com/) (Certified Secure Raw PDF & Image Delivery) |
-| **Containerization**| [Docker](https://www.docker.com/) & Docker Compose |
 
 ---
 
@@ -153,10 +199,11 @@ Add your service endpoints:
 
 ```env
 # Client-Facing Public API Gateway (Accessible from User's Browser)
-NEXT_PUBLIC_API_BASE_URL=https://api.yourdomain.com/api/v1
+NEXT_PUBLIC_API_BASE_URL=http://localhost/api/v1
+NEXT_PUBLIC_API_URL=http://localhost/api/v1
 
-# Internal Docker Network Service URL (Optional: For Server-Side Rendering within Docker)
-INTERNAL_API_BASE_URL=http://backend_service:port/api/v1
+# Internal Docker Network Service URL (For Server-Side Rendering within Docker Network)
+INTERNAL_API_BASE_URL=http://healthcare_nginx/api/v1
 ```
 
 ---
@@ -178,7 +225,7 @@ docker compose logs -f
 docker compose down
 ```
 
-Access the application at **`http://localhost:3000`**.
+Access the application at **`http://localhost:3000`** (or through the Nginx gateway at **`http://localhost`**).
 
 ### Option 2: Running Locally
 
@@ -189,7 +236,7 @@ npm install --legacy-peer-deps
 # 2. Run development server
 npm run dev
 
-# 3. Production build
+# 3. Production build & start
 npm run build
 npm run start
 ```
