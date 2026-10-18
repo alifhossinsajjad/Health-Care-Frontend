@@ -4,6 +4,8 @@ import { StatCard } from "@/src/components/shared/stats/StatCard";
 import { DashboardPieChart } from "@/src/components/shared/stats/StatCharts";
 import { Users, CalendarCheck, Star, DollarSign } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function DoctorDashboardPage() {
   const { success, data: stats, message } = await getDashboardStats();
 

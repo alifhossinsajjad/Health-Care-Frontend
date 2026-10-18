@@ -51,6 +51,9 @@ export const getAllDoctors = async (
 
     return { success: true, data: data.data, meta: data.meta };
   } catch (error: any) {
+    if (error?.digest === "DYNAMIC_SERVER_USAGE") {
+      throw error;
+    }
     console.error("Fetch Doctors Error:", error);
     return {
       success: false,

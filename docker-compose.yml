@@ -13,6 +13,7 @@ services:
       - .env
     environment:
       - NODE_ENV=production
+      - INTERNAL_API_BASE_URL=http://healthcare_api:5000/api/v1
     networks:
       - healthcare_network
 

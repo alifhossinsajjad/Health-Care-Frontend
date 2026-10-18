@@ -7,6 +7,8 @@ import {
   Star,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function PatientDashboardPage() {
   const { success, data: stats, message } = await getDashboardStats();
 

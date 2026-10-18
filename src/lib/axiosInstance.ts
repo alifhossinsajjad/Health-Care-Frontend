@@ -53,8 +53,10 @@ axiosInstance.interceptors.request.use(
         token = cookieStore.get("accessToken")?.value;
 
         // Optional: Token Refresh Logic on Server can be added here
-      } catch (error) {
-        console.error("Failed to get cookies on server", error);
+      } catch (error: any) {
+        if (error?.digest === "DYNAMIC_SERVER_USAGE") {
+          throw error;
+        }
       }
     } else {
       // Client-side Environment (Browser)

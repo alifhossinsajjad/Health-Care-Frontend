@@ -27,6 +27,9 @@ export const getDashboardStats = async (): Promise<{ success: boolean; data?: Da
 
     return { success: true, data: data.data };
   } catch (error: any) {
+    if (error?.digest === "DYNAMIC_SERVER_USAGE") {
+      throw error;
+    }
     console.error("Dashboard Stats Fetch Error:", error);
     return { success: false, message: "Internal server error fetching stats" };
   }
