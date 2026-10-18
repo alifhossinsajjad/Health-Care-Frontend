@@ -1,0 +1,46 @@
+name: Healthcare Frontend CD (Production Deployment)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: frontend-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Production Linux VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check VPS Configuration
+        id: check_vps
+        run: |
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "::notice title=VPS Pending::VPS_HOST secret not configured yet. Skipping SSH deploy."
+          else
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy Frontend via SSH
+        if: steps.check_vps.outputs.configured == 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER || 'root' }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
+          script: |
+            echo "=== Starting Healthcare Frontend Deployment ==="
+            cd /opt/healthcare-frontend || exit 1
+            git pull origin main
+            docker compose up -d --build --remove-orphans
+            docker image prune -f
+            echo "=== Frontend Deployment Complete! ==="
