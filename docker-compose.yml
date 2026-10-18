@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+        INTERNAL_API_BASE_URL: ${INTERNAL_API_BASE_URL}
+        IS_DOCKER: "true"
     container_name: healthcare_frontend
     restart: unless-stopped
     ports:
