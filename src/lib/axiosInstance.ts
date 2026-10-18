@@ -6,7 +6,9 @@ export const API_BASE_URL =
   process.env.IS_DOCKER === "true" &&
   process.env.INTERNAL_API_BASE_URL
     ? process.env.INTERNAL_API_BASE_URL
-    : process.env.NEXT_PUBLIC_API_BASE_URL;
+    : process.env.NEXT_PUBLIC_API_BASE_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      "http://localhost/api/v1";
 
 if (!API_BASE_URL) {
   throw new Error(
