@@ -68,8 +68,9 @@ const getUserInfo = async (token: string) => {
 async function refreshTokenMiddleware(refreshToken: string): Promise<string | null> {
   try {
     const apiBase =
-      process.env.INTERNAL_API_BASE_URL ||
-      process.env.NEXT_PUBLIC_API_BASE_URL;
+      process.env.IS_DOCKER === "true" && process.env.INTERNAL_API_BASE_URL
+        ? process.env.INTERNAL_API_BASE_URL
+        : process.env.NEXT_PUBLIC_API_BASE_URL;
     if (!apiBase) {
       console.error("API base URL is not defined in environment variables.");
       return null;

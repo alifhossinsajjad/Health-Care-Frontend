@@ -2,7 +2,9 @@ import axios from "axios";
 import { ApiResponse } from "@/src/types/api.type";
 
 export const API_BASE_URL =
-  typeof window === "undefined" && process.env.INTERNAL_API_BASE_URL
+  typeof window === "undefined" &&
+  process.env.IS_DOCKER === "true" &&
+  process.env.INTERNAL_API_BASE_URL
     ? process.env.INTERNAL_API_BASE_URL
     : process.env.NEXT_PUBLIC_API_BASE_URL;
 
