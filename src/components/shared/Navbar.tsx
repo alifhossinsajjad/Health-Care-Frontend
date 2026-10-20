@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, Menu } from "lucide-react";
+import { Activity, Menu, Sparkles } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/src/components/ui/sheet";
 
@@ -60,6 +60,13 @@ export function Navbar() {
           </Link>
           <Link href="/doctors" className={getLinkClasses("/doctors")}>
             Find Doctors
+          </Link>
+          <Link
+            href="/ai-assistant"
+            className={`${getLinkClasses("/ai-assistant")} flex items-center gap-1.5`}
+          >
+            <Sparkles className="h-3.5 w-3.5 text-purple-500 animate-pulse" />
+            <span>AI Assistant</span>
           </Link>
           <Link href="/services" className={getLinkClasses("/services")}>
             Services
@@ -123,6 +130,17 @@ export function Navbar() {
                   }`}
                 >
                   Find Doctors
+                </Link>
+                <Link
+                  href="/ai-assistant"
+                  className={`text-lg font-semibold transition-colors flex items-center gap-2 ${
+                    pathname.startsWith("/ai-assistant")
+                      ? "text-blue-600 dark:text-blue-500"
+                      : "hover:text-blue-600 dark:hover:text-blue-500"
+                  }`}
+                >
+                  <Sparkles className="h-4 w-4 text-purple-500 animate-pulse" />
+                  <span>AI Assistant</span>
                 </Link>
                 <Link
                   href="/services"

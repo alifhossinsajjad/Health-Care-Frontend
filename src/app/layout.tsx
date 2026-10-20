@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "A comprehesive healthcare management system",
 };
 
+import { AIAssistantFloatingWidget } from "@/src/components/modules/ai-assistant/AIAssistantFloatingWidget";
+
 export default function RootLayout({
   children,
 }: {
@@ -30,7 +32,10 @@ export default function RootLayout({
       className={`${poppins.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <AppProviders>{children}</AppProviders>
+        <AppProviders>
+          {children}
+          <AIAssistantFloatingWidget />
+        </AppProviders>
       </body>
     </html>
   );
