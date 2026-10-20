@@ -17,6 +17,7 @@ import {
   Activity,
   Terminal,
   Layers,
+  Bot,
   LucideIcon,
 } from "lucide-react";
 
@@ -163,6 +164,11 @@ export const adminNavItems: NavSection[] = [
   {
     title: "System & Monitoring",
     items: [
+      {
+        title: "AI Knowledge Base",
+        href: "/admin/dashboard/ai-knowledge",
+        icon: Bot,
+      },
       {
         title: "Request Logs",
         href: "/admin/dashboard/request-logs",

@@ -118,10 +118,17 @@ export const aiService = {
               } else if (eventData.type === "done") {
                 onDone(eventData.data);
               } else if (eventData.type === "error") {
-                onError?.(eventData.message || "An error occurred during AI generation.");
+                onError?.(
+                  eventData.message ||
+                    "An error occurred during AI generation.",
+                );
               }
             } catch (parseErr) {
-              console.warn("Failed to parse SSE line chunk:", jsonStr, parseErr);
+              console.warn(
+                "Failed to parse SSE line chunk:",
+                jsonStr,
+                parseErr,
+              );
             }
           }
         }
@@ -143,7 +150,10 @@ export const aiService = {
         // User aborted the stream intentionally (Stop Generating)
         return;
       }
-      const message = err instanceof Error ? err.message : "Network error during AI streaming.";
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Network error during AI streaming.";
       onError?.(message);
     }
   },
@@ -173,7 +183,10 @@ export const aiService = {
     } catch (err: unknown) {
       return {
         success: false,
-        message: err instanceof Error ? err.message : "Failed to generate AI response.",
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to generate AI response.",
       };
     }
   },
@@ -196,7 +209,10 @@ export const aiService = {
     } catch (err: unknown) {
       return {
         success: false,
-        message: err instanceof Error ? err.message : "Failed to fetch doctor availability.",
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to fetch doctor availability.",
       };
     }
   },
@@ -216,7 +232,10 @@ export const aiService = {
     } catch (err: unknown) {
       return {
         success: false,
-        message: err instanceof Error ? err.message : "Failed to retrieve hospital payment policy.",
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to retrieve hospital payment policy.",
       };
     }
   },
@@ -251,7 +270,10 @@ export const aiService = {
     } catch (err: unknown) {
       return {
         success: false,
-        message: err instanceof Error ? err.message : "Failed to reserve appointment slot.",
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to reserve appointment slot.",
       };
     }
   },
@@ -275,7 +297,8 @@ export const aiService = {
     } catch (err: unknown) {
       return {
         success: false,
-        message: err instanceof Error ? err.message : "Knowledge base sync failed.",
+        message:
+          err instanceof Error ? err.message : "Knowledge base sync failed.",
       };
     }
   },
@@ -299,7 +322,10 @@ export const aiService = {
     } catch (err: unknown) {
       return {
         success: false,
-        message: err instanceof Error ? err.message : "Failed to fetch AI knowledge statistics.",
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to fetch AI knowledge statistics.",
       };
     }
   },

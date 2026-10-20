@@ -158,10 +158,15 @@ export interface IAIHoldSlotResult {
 
 /** Admin Tool: Knowledge Base Statistics (GET /api/v1/ai/stats) */
 export interface IAIKnowledgeStats {
-  totalVectors: number;
-  activeIndexes: number;
-  categories: Record<string, number>;
+  totalVectors?: number;
+  totalDocuments?: number;
+  activeIndexes?: number;
+  categories?: Record<string, number>;
   lastSyncedAt?: string;
+  vectorStoreStatus?: string;
+  dimensions?: number;
+  embeddingModel?: string;
+  [key: string]: any;
 }
 
 // ------------------------------------------------------------------------------

@@ -49,7 +49,7 @@ export function AIAssistantFloatingWidget() {
 
         {/* 2. Floating Chat Window */}
         {isOpen && (
-          <div className="fixed inset-0 sm:inset-auto sm:bottom-5 sm:right-5 sm:w-[420px] sm:h-[620px] z-50 flex flex-col rounded-none sm:rounded-3xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className="fixed inset-2 sm:inset-auto sm:bottom-4 sm:right-4 sm:w-[410px] sm:max-w-[calc(100vw-1.5rem)] sm:h-[min(560px,calc(100dvh-2.5rem))] max-h-[calc(100dvh-1rem)] z-50 flex flex-col rounded-2xl sm:rounded-3xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
             <AIChatContainer onClose={() => setIsOpen(false)} />
           </div>
         )}
