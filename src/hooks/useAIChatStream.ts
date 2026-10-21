@@ -4,77 +4,117 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { aiService } from "@/src/services/ai.service";
 import {
   IChatMessage,
+  IChatSession,
   IAIChatHistoryItem,
   IAIStreamDoneMetadata,
   IAIHoldSlotResult,
 } from "@/src/types/ai.type";
 
-const STORAGE_KEY = "healthcare_ai_chat_history";
+const SESSIONS_STORAGE_KEY = "healthcare_ai_chat_sessions_v2";
+const ACTIVE_SESSION_ID_KEY = "healthcare_ai_active_session_id_v2";
 
-const INITIAL_GREETING: IChatMessage = {
-  id: "greeting-0",
+const createInitialGreeting = (): IChatMessage => ({
+  id: `greeting-${Date.now()}`,
   sender: "ai",
   text: "Hello! I am your HealthCare Clinical AI Assistant. You can describe your symptoms, ask for specialist recommendations, verify doctor schedule availability, or learn about our online payment policies. How can I assist your health today?",
   timestamp: new Date().toISOString(),
+});
+
+const createDefaultSession = (): IChatSession => {
+  const now = new Date().toISOString();
+  return {
+    id: `session-${Date.now()}`,
+    title: "New Health Consultation",
+    createdAt: now,
+    updatedAt: now,
+    messages: [createInitialGreeting()],
+  };
 };
 
 export interface UseAIChatStreamReturn {
+  // Active conversation state
+  activeSessionId: string;
+  activeSessionTitle: string;
   messages: IChatMessage[];
   isStreaming: boolean;
   streamingMessageId: string | null;
   error: string | null;
+
+  // Multi-session history list (ChatGPT / Gemini / Claude style)
+  sessions: IChatSession[];
+
+  // Conversation control actions
   sendMessage: (query: string) => Promise<void>;
   stopStreaming: () => void;
-  clearChat: () => void;
+  clearChat: () => void; // Clears active session messages
+  createNewSession: () => void; // Starts a fresh conversation ("+ New Chat")
+  switchSession: (sessionId: string) => void; // Switches to another past conversation
+  deleteSession: (sessionId: string) => void; // Deletes a specific conversation
+  clearAllSessions: () => void; // Clears all history
+  renameSession: (sessionId: string, newTitle: string) => void;
   holdDoctorSlot: (doctorId: string, scheduleId: string) => Promise<IAIHoldSlotResult | null>;
 }
 
 /**
  * ==============================================================================
- * useAIChatStream — Enterprise Headless Chat & SSE Streaming Hook
+ * useAIChatStream — Enterprise Multi-Session Chat & SSE Streaming Hook
  * ==============================================================================
- * Encapsulates:
- * 1. Token-by-token accumulator for ChatGPT-like live rendering
- * 2. Multi-turn chat history formatting for Gemini LLM API
- * 3. Clinical metadata tracking (Emergency beacons, recommended doctors, RAG sources)
- * 4. Graceful stream abortion (Stop Generating)
- * 5. Safe client-side session persistence
+ * Features:
+ * 1. ChatGPT/Gemini-style Multi-turn Conversation Sessions with persistent history
+ * 2. Automatic smart session titling based on patient's initial query
+ * 3. Real-time token streaming with AbortController cancellation
+ * 4. Clinical Triage metadata tracking (Emergency alerts, doctor recommendations)
+ * 5. Instant session switching, deletion, and new chat creation
  */
 export function useAIChatStream(): UseAIChatStreamReturn {
-  const [messages, setMessages] = useState<IChatMessage[]>([INITIAL_GREETING]);
+  const [sessions, setSessions] = useState<IChatSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string>("");
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const abortControllerRef = useRef<AbortController | null>(null);
+  const isHydratedRef = useRef<boolean>(false);
 
   // ----------------------------------------------------------------------------
-  // 1. Session Persistence (Hydrate from sessionStorage on client mount)
+  // 1. Session Persistence & Hydration (from localStorage)
   // ----------------------------------------------------------------------------
   useEffect(() => {
     try {
-      const saved = sessionStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
+      const savedSessions = localStorage.getItem(SESSIONS_STORAGE_KEY);
+      const savedActiveId = localStorage.getItem(ACTIVE_SESSION_ID_KEY);
+
+      if (savedSessions) {
+        const parsed: IChatSession[] = JSON.parse(savedSessions);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setMessages(parsed);
+          setSessions(parsed);
+          const activeExists = parsed.some((s) => s.id === savedActiveId);
+          setActiveSessionId(activeExists ? (savedActiveId as string) : parsed[0].id);
+          isHydratedRef.current = true;
+          return;
         }
       }
     } catch {
-      // Fallback silently if sessionStorage is unavailable
+      // Fallback silently if localStorage fails
     }
+
+    // Initialize with a fresh default session if nothing saved
+    const initialSession = createDefaultSession();
+    setSessions([initialSession]);
+    setActiveSessionId(initialSession.id);
+    isHydratedRef.current = true;
   }, []);
 
-  // Save conversation state whenever messages change and not actively streaming
+  // Save sessions to localStorage whenever they change
   useEffect(() => {
-    if (!isStreaming && messages.length > 0) {
-      try {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-      } catch {
-        // Ignore quota exceeded errors
-      }
+    if (!isHydratedRef.current || sessions.length === 0) return;
+    try {
+      localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
+      localStorage.setItem(ACTIVE_SESSION_ID_KEY, activeSessionId);
+    } catch {
+      // Ignore quota exceeded
     }
-  }, [messages, isStreaming]);
+  }, [sessions, activeSessionId]);
 
   // Clean up running stream on unmount
   useEffect(() => {
@@ -84,6 +124,11 @@ export function useAIChatStream(): UseAIChatStreamReturn {
       }
     };
   }, []);
+
+  // Get active session and its messages
+  const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0];
+  const messages = activeSession?.messages || [];
+  const activeSessionTitle = activeSession?.title || "Health Consultation";
 
   // ----------------------------------------------------------------------------
   // 2. Stop Streaming Action
@@ -98,24 +143,100 @@ export function useAIChatStream(): UseAIChatStreamReturn {
   }, []);
 
   // ----------------------------------------------------------------------------
-  // 3. Clear Chat Action
+  // 3. Multi-Session Actions (New Chat, Switch, Delete, Clear All)
   // ----------------------------------------------------------------------------
-  const clearChat = useCallback(() => {
+
+  /** Start a brand new consultation session (like ChatGPT "+ New Chat") */
+  const createNewSession = useCallback(() => {
     stopStreaming();
-    setMessages([
-      {
-        ...INITIAL_GREETING,
-        id: `greeting-${Date.now()}`,
-        timestamp: new Date().toISOString(),
-      },
-    ]);
+    setError(null);
+
+    // If current session only has greeting and no user queries, reuse it
+    if (
+      activeSession &&
+      activeSession.messages.length === 1 &&
+      activeSession.messages[0].sender === "ai"
+    ) {
+      return;
+    }
+
+    const newSession = createDefaultSession();
+    setSessions((prev) => [newSession, ...prev]);
+    setActiveSessionId(newSession.id);
+  }, [activeSession, stopStreaming]);
+
+  /** Switch to a past conversation */
+  const switchSession = useCallback(
+    (sessionId: string) => {
+      if (sessionId === activeSessionId) return;
+      stopStreaming();
+      setError(null);
+      setActiveSessionId(sessionId);
+    },
+    [activeSessionId, stopStreaming],
+  );
+
+  /** Delete a specific conversation session */
+  const deleteSession = useCallback(
+    (sessionId: string) => {
+      stopStreaming();
+      setSessions((prev) => {
+        const remaining = prev.filter((s) => s.id !== sessionId);
+        if (remaining.length === 0) {
+          const fresh = createDefaultSession();
+          setActiveSessionId(fresh.id);
+          return [fresh];
+        }
+        if (sessionId === activeSessionId) {
+          setActiveSessionId(remaining[0].id);
+        }
+        return remaining;
+      });
+    },
+    [activeSessionId, stopStreaming],
+  );
+
+  /** Clear all session history */
+  const clearAllSessions = useCallback(() => {
+    stopStreaming();
+    const fresh = createDefaultSession();
+    setSessions([fresh]);
+    setActiveSessionId(fresh.id);
     setError(null);
     try {
-      sessionStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(SESSIONS_STORAGE_KEY);
+      localStorage.setItem(ACTIVE_SESSION_ID_KEY, fresh.id);
     } catch {
       // Ignore
     }
   }, [stopStreaming]);
+
+  /** Clear messages in currently active chat */
+  const clearChat = useCallback(() => {
+    stopStreaming();
+    setError(null);
+    const greeting = createInitialGreeting();
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === activeSessionId
+          ? {
+              ...s,
+              title: "New Health Consultation",
+              updatedAt: new Date().toISOString(),
+              messages: [greeting],
+            }
+          : s,
+      ),
+    );
+  }, [activeSessionId, stopStreaming]);
+
+  /** Rename a session */
+  const renameSession = useCallback((sessionId: string, newTitle: string) => {
+    if (!newTitle.trim()) return;
+    setSessions((prev) =>
+      prev.map((s) => (s.id === sessionId ? { ...s, title: newTitle.trim() } : s)),
+    );
+  }, []);
 
   // ----------------------------------------------------------------------------
   // 4. Send Message & Handle SSE Streaming
@@ -123,7 +244,7 @@ export function useAIChatStream(): UseAIChatStreamReturn {
   const sendMessage = useCallback(
     async (rawQuery: string) => {
       const query = rawQuery.trim();
-      if (!query || isStreaming) return;
+      if (!query || isStreaming || !activeSessionId) return;
 
       setError(null);
 
@@ -135,7 +256,7 @@ export function useAIChatStream(): UseAIChatStreamReturn {
         timestamp: new Date().toISOString(),
       };
 
-      // 2. Construct AI Placeholder Message (for live token accumulation)
+      // 2. Construct AI Placeholder Message
       const aiMessageId = `ai-${Date.now()}`;
       const placeholderAiMessage: IChatMessage = {
         id: aiMessageId,
@@ -145,20 +266,41 @@ export function useAIChatStream(): UseAIChatStreamReturn {
         isStreaming: true,
       };
 
-      // Optimistically push both into messages list
-      setMessages((prev) => [...prev, userMessage, placeholderAiMessage]);
+      // 3. Smart title generation: if first user message, update session title
+      const currentMessages = activeSession?.messages || [];
+      const isFirstUserQuery = !currentMessages.some((m) => m.sender === "user");
+      const generatedTitle = isFirstUserQuery
+        ? query.length > 36
+          ? `${query.substring(0, 36)}...`
+          : query
+        : activeSession?.title || "Health Consultation";
+
+      // Optimistically push into active session
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.id === activeSessionId
+            ? {
+                ...s,
+                title: generatedTitle,
+                updatedAt: new Date().toISOString(),
+                messages: [...s.messages, userMessage, placeholderAiMessage],
+              }
+            : s,
+        ),
+      );
+
       setIsStreaming(true);
       setStreamingMessageId(aiMessageId);
 
-      // 3. Prepare Multi-turn Chat History for LLM Context
-      const historyPayload: IAIChatHistoryItem[] = messages
-        .filter((msg) => msg.id !== "greeting-0" && !msg.error && msg.text.trim())
+      // 4. Prepare Multi-turn Chat History for LLM Context
+      const historyPayload: IAIChatHistoryItem[] = currentMessages
+        .filter((msg) => !msg.id.startsWith("greeting") && !msg.error && msg.text.trim())
         .map((msg) => ({
           role: msg.sender === "user" ? "user" : "model",
           parts: msg.text,
         }));
 
-      // 4. Initialize AbortController
+      // 5. Initialize AbortController
       const controller = new AbortController();
       abortControllerRef.current = controller;
 
@@ -172,28 +314,43 @@ export function useAIChatStream(): UseAIChatStreamReturn {
         signal: controller.signal,
         onToken: (token: string) => {
           accumulatedText += token;
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === aiMessageId
-                ? { ...msg, text: accumulatedText, isStreaming: true }
-                : msg,
+          setSessions((prev) =>
+            prev.map((s) =>
+              s.id === activeSessionId
+                ? {
+                    ...s,
+                    messages: s.messages.map((msg) =>
+                      msg.id === aiMessageId
+                        ? { ...msg, text: accumulatedText, isStreaming: true }
+                        : msg,
+                    ),
+                  }
+                : s,
             ),
           );
         },
         onDone: (doneData: IAIStreamDoneMetadata) => {
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === aiMessageId
+          setSessions((prev) =>
+            prev.map((s) =>
+              s.id === activeSessionId
                 ? {
-                    ...msg,
-                    text: accumulatedText || msg.text,
-                    isStreaming: false,
-                    isEmergency: doneData.isEmergency,
-                    suggestedSpecialties: doneData.suggestedSpecialties,
-                    recommendedDoctors: doneData.recommendedDoctors,
-                    sources: doneData.sources,
+                    ...s,
+                    updatedAt: new Date().toISOString(),
+                    messages: s.messages.map((msg) =>
+                      msg.id === aiMessageId
+                        ? {
+                            ...msg,
+                            text: accumulatedText || msg.text,
+                            isStreaming: false,
+                            isEmergency: doneData.isEmergency,
+                            suggestedSpecialties: doneData.suggestedSpecialties,
+                            recommendedDoctors: doneData.recommendedDoctors,
+                            sources: doneData.sources,
+                          }
+                        : msg,
+                    ),
                   }
-                : msg,
+                : s,
             ),
           );
           setIsStreaming(false);
@@ -202,16 +359,23 @@ export function useAIChatStream(): UseAIChatStreamReturn {
         },
         onError: (errMessage: string) => {
           setError(errMessage);
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === aiMessageId
+          setSessions((prev) =>
+            prev.map((s) =>
+              s.id === activeSessionId
                 ? {
-                    ...msg,
-                    text: accumulatedText || "I encountered an issue processing your request.",
-                    isStreaming: false,
-                    error: errMessage,
+                    ...s,
+                    messages: s.messages.map((msg) =>
+                      msg.id === aiMessageId
+                        ? {
+                            ...msg,
+                            text: accumulatedText || "I encountered an issue processing your request.",
+                            isStreaming: false,
+                            error: errMessage,
+                          }
+                        : msg,
+                    ),
                   }
-                : msg,
+                : s,
             ),
           );
           setIsStreaming(false);
@@ -220,7 +384,7 @@ export function useAIChatStream(): UseAIChatStreamReturn {
         },
       });
     },
-    [isStreaming, messages],
+    [activeSession, activeSessionId, isStreaming],
   );
 
   // ----------------------------------------------------------------------------
@@ -234,14 +398,19 @@ export function useAIChatStream(): UseAIChatStreamReturn {
       try {
         const response = await aiService.holdSlotWithAI({ doctorId, scheduleId });
         if (response.success && response.data) {
-          // Push confirmation message into the chat
           const confirmationMsg: IChatMessage = {
             id: `system-${Date.now()}`,
             sender: "system",
             text: `Appointment slot reserved for ${response.data.doctorName}! ${response.data.warning}`,
             timestamp: new Date().toISOString(),
           };
-          setMessages((prev) => [...prev, confirmationMsg]);
+          setSessions((prev) =>
+            prev.map((s) =>
+              s.id === activeSessionId
+                ? { ...s, messages: [...s.messages, confirmationMsg] }
+                : s,
+            ),
+          );
           return response.data;
         } else {
           setError(response.message || "Could not reserve slot.");
@@ -253,17 +422,25 @@ export function useAIChatStream(): UseAIChatStreamReturn {
         return null;
       }
     },
-    [],
+    [activeSessionId],
   );
 
   return {
+    activeSessionId,
+    activeSessionTitle,
     messages,
     isStreaming,
     streamingMessageId,
     error,
+    sessions,
     sendMessage,
     stopStreaming,
     clearChat,
+    createNewSession,
+    switchSession,
+    deleteSession,
+    clearAllSessions,
+    renameSession,
     holdDoctorSlot,
   };
 }

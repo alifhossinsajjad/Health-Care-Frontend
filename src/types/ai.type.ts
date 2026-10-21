@@ -185,3 +185,15 @@ export interface IChatMessage {
   sources?: IAIRAGSource[];
   error?: string;
 }
+
+// ------------------------------------------------------------------------------
+// 7. Chat Conversation Session Model (ChatGPT / Gemini Multi-Session History)
+// ------------------------------------------------------------------------------
+
+export interface IChatSession {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  messages: IChatMessage[];
+}
