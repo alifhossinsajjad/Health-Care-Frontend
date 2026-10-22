@@ -10,7 +10,7 @@ export default async function CommonLayout({
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("accessToken")?.value;
-  let isLoggedIn = !!token;
+  const isLoggedIn = !!token;
   let userRole = "PATIENT";
 
   if (token) {

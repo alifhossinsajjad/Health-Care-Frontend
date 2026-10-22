@@ -98,57 +98,57 @@ export const useMediaTracks = ({
     }
   }, [isAudioMuted, onMediaToggled]);
 
+  const revertScreenShare = useCallback(
+    async (pc: RTCPeerConnection | null) => {
+      if (screenStreamRef.current) {
+        screenStreamRef.current.getTracks().forEach((track) => track.stop());
+        screenStreamRef.current = null;
+      }
+      if (pc) {
+        const cameraTrack = localStreamRef.current?.getVideoTracks()[0];
+        const sender = pc.getSenders().find((s) => s.track?.kind === "video");
+        if (sender && cameraTrack) {
+          await sender.replaceTrack(cameraTrack);
+        }
+      }
+      if (localVideoRef.current && localStreamRef.current) {
+        localVideoRef.current.srcObject = localStreamRef.current;
+        localVideoRef.current.play().catch(() => {});
+      }
+      setIsScreenSharing(false);
+      onScreenShareToggled?.(false);
+    },
+    [onScreenShareToggled]
+  );
+
   /**
    * Toggle clinical screen share
    */
   const toggleScreenShare = useCallback(
     async (pc: RTCPeerConnection | null) => {
       if (!pc) return;
-
       if (isScreenSharing) {
-        // Revert to camera
-        if (screenStreamRef.current) {
-          screenStreamRef.current.getTracks().forEach((track) => track.stop());
-          screenStreamRef.current = null;
-        }
-
-        const cameraTrack = localStreamRef.current?.getVideoTracks()[0];
-        const sender = pc.getSenders().find((s) => s.track?.kind === "video");
-        if (sender && cameraTrack) {
-          await sender.replaceTrack(cameraTrack);
-        }
-
-        if (localVideoRef.current && localStreamRef.current) {
-          localVideoRef.current.srcObject = localStreamRef.current;
-          localVideoRef.current.play().catch(() => {});
-        }
-
-        setIsScreenSharing(false);
-        onScreenShareToggled?.(false);
+        await revertScreenShare(pc);
       } else {
         try {
           const screenStream = await navigator.mediaDevices.getDisplayMedia({
             video: { cursor: "always" } as any,
             audio: false,
           });
-
           screenStreamRef.current = screenStream;
           const screenTrack = screenStream.getVideoTracks()[0];
-
           screenTrack.onended = () => {
-            toggleScreenShare(pc);
+            revertScreenShare(pc);
           };
 
           const sender = pc.getSenders().find((s) => s.track?.kind === "video");
           if (sender) {
             await sender.replaceTrack(screenTrack);
           }
-
           if (localVideoRef.current) {
             localVideoRef.current.srcObject = screenStream;
             localVideoRef.current.play().catch(() => {});
           }
-
           setIsScreenSharing(true);
           onScreenShareToggled?.(true);
         } catch (err) {
@@ -156,7 +156,7 @@ export const useMediaTracks = ({
         }
       }
     },
-    [isScreenSharing, onScreenShareToggled]
+    [isScreenSharing, revertScreenShare, onScreenShareToggled]
   );
 
   /**
