@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 export default function ConsultationPage() {
-  return <p>Consultation Page</p>;
+  redirect("/dashboard/my-appointments");
 }

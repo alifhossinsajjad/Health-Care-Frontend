@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { 
   Calendar, 
@@ -176,10 +177,13 @@ export default async function DoctorAppointmentsPage() {
                   {appt.videoCallingId && isScheduled && (
                     <Button
                       size="sm"
-                      className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1.5"
+                      asChild
+                      className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm"
                     >
-                      <Video className="w-3.5 h-3.5" />
-                      Join Consultation
+                      <Link href={`/consultation/${appt.id}`}>
+                        <Video className="w-3.5 h-3.5" />
+                        Join Consultation
+                      </Link>
                     </Button>
                   )}
                 </div>
