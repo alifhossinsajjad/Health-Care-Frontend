@@ -123,11 +123,21 @@ export function DoctorScheduleBooking({
       return;
     }
 
-    // Check Authentication Guard
-    const token =
+    // Check Authentication Guard (Universal: checks localStorage and document.cookie)
+    let token =
       typeof window !== "undefined"
         ? localStorage.getItem("accessToken")
         : null;
+
+    if (!token && typeof document !== "undefined") {
+      const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]+)/);
+      if (match) {
+        token = decodeURIComponent(match[1]);
+        try {
+          localStorage.setItem("accessToken", token);
+        } catch {}
+      }
+    }
 
     if (!token) {
       toast.info("Please login to proceed with booking your appointment.");

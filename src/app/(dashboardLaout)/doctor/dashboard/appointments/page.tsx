@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { getMyAppointments } from "@/src/services/appointment.service";
 import { Button } from "@/src/components/ui/button";
+import { JoinConsultationButton } from "@/src/components/modules/appointments/JoinConsultationButton";
 
 export const metadata = {
   title: "Patient Appointments | Doctor Dashboard",
@@ -26,6 +27,7 @@ export default async function DoctorAppointmentsPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
+
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -168,23 +170,23 @@ export default async function DoctorAppointmentsPage() {
                         </>
                       ) : (
                         <>
-                          <AlertCircle className="w-3 h-3" /> Pay at Clinic
+                          <Clock className="w-3 h-3 text-amber-500" /> Payment Pending
                         </>
                       )}
                     </span>
                   </div>
 
                   {appt.videoCallingId && isScheduled && (
-                    <Button
-                      size="sm"
-                      asChild
-                      className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm"
-                    >
-                      <Link href={`/consultation/${appt.id}`}>
-                        <Video className="w-3.5 h-3.5" />
-                        Join Consultation
-                      </Link>
-                    </Button>
+                    <JoinConsultationButton
+                      appointmentId={appt.id}
+                      isPaid={
+                        appt.paymentStatus === "PAID" ||
+                        appt.payment?.status === "PAID"
+                      }
+                      isScheduled={isScheduled}
+                      userRole="DOCTOR"
+                      label="Join Consultation"
+                    />
                   )}
                 </div>
               </div>
@@ -195,4 +197,3 @@ export default async function DoctorAppointmentsPage() {
     </div>
   );
 }
-   

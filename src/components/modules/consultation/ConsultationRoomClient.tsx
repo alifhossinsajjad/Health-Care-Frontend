@@ -28,8 +28,12 @@ export function ConsultationRoomClient({
   const router = useRouter();
   const [mobileActiveTab, setMobileActiveTab] = useState<"video" | "chat">("video");
 
-  // Determine partner profile based on current role
-  const isDoctor = currentUserRole === "DOCTOR";
+  // Determine partner profile based on current role and ID matching
+  const isDoctor =
+    String(currentUserRole).toUpperCase() === "DOCTOR" ||
+    (Boolean(appointment.doctorId) && currentUserId === appointment.doctorId) ||
+    (Boolean(appointment.doctor?.userId) && currentUserId === appointment.doctor?.userId) ||
+    (Boolean(appointment.doctor?.id) && currentUserId === appointment.doctor?.id);
   const partnerName = isDoctor
     ? appointment.patient?.name || "Patient"
     : appointment.doctor?.name || "Doctor";

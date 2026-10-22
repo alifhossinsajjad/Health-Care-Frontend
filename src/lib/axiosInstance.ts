@@ -11,9 +11,7 @@ export const API_BASE_URL =
       "http://localhost/api/v1";
 
 if (!API_BASE_URL) {
-  throw new Error(
-    "API base URL is not defined in the environment variables."
-  );
+  throw new Error("API base URL is not defined in the environment variables.");
 }
 
 // Base API URL

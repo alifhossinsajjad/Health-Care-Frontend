@@ -39,14 +39,17 @@ export interface IChatSender {
 
 export interface IChatMessage {
   id: string;
+  tempId?: string;
   appointmentId: string;
   senderId: string;
+  senderName?: string;
   senderRole?: "DOCTOR" | "PATIENT" | "ADMIN" | "SUPER_ADMIN";
   sender?: IChatSender;
   content: string;
   messageType: ChatMessageType;
   attachmentUrl?: string | null;
   attachmentMeta?: IChatAttachment | null;
+  attachment?: IChatAttachment | null;
   isRead: boolean;
   readAt?: string | null;
   isEdited?: boolean;
@@ -56,6 +59,9 @@ export interface IChatMessage {
   createdAt: string;
   updatedAt?: string;
 }
+
+export type ISendMessagePayload = IChatSendPayload;
+
 
 export interface IChatHistoryResponse {
   data: IChatMessage[];
@@ -80,6 +86,7 @@ export interface IChatSendPayload {
   content: string;
   messageType?: ChatMessageType;
   attachmentUrl?: string | null;
+  attachmentMetadata?: IChatAttachment;
   tempId?: string;
 }
 
