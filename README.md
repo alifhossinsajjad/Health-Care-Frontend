@@ -5,6 +5,8 @@
   <img src="https://img.shields.io/badge/React-19.2.8-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS v4" />
+  <img src="https://img.shields.io/badge/WebRTC-P2P_Voice_%26_Video-FF3E00?style=for-the-badge&logo=webrtc&logoColor=white" alt="WebRTC" />
+  <img src="https://img.shields.io/badge/Socket.io-Real--Time_Messaging-010101?style=for-the-badge&logo=socket.io&logoColor=white" alt="Socket.io" />
   <img src="https://img.shields.io/badge/Google_Gemini-Applied_AI_&_RAG-8E75C2?style=for-the-badge&logo=googlegemini&logoColor=white" alt="Google Gemini RAG" />
   <img src="https://img.shields.io/badge/Server--Sent_Events-Live_Token_Streaming-FF6B6B?style=for-the-badge&logo=fastapi&logoColor=white" alt="SSE Streaming" />
   <img src="https://img.shields.io/badge/Docker-Standalone_Container-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
@@ -166,6 +168,91 @@ flowchart TD
 - **Live Vector Store Telemetry:** Visualizes total indexed vectors, doctor document counts, specialty tags, and pgvector cosine distance health metrics (`GET /api/v1/ai/stats`).
 - **One-Click Incremental Sync:** Trigger button for `POST /api/v1/ai/sync` with loading spinners and status toasts.
 - **Live Triage & Vector Simulator:** Interactive administrative sandbox allowing staff to test Bengali or English symptom queries and preview vector matching in real-time.
+
+---
+
+## 🎥 Real-Time Telemedicine Messaging & WebRTC Live P2P Consultation Architecture
+
+Our platform provides an enterprise **Split Consultation Room (`/consultation/[appointmentId]`)** integrating **WebRTC Peer-to-Peer Encrypted HD Video/Voice Calling** with a **WhatsApp / Messenger UX Real-Time Chat Engine** powered by Socket.io.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Doctor as Doctor Client
+    participant Signaling as Socket.io Server (Signaling Gateway)
+    actor Patient as Patient Client
+    participant Cloud as Cloudinary Storage
+
+    Note over Doctor,Patient: 1. Room Handshake & Presence Setup
+    Doctor->>Signaling: join:appointment { appointmentId }
+    Patient->>Signaling: join:appointment { appointmentId }
+    Signaling-->>Doctor: participant:online { userId, role }
+    Signaling-->>Patient: participant:online { userId, role }
+
+    Note over Doctor,Patient: 2. Real-Time Chat Engine (WhatsApp / Messenger UX)
+    Patient->>Signaling: chat:typing { isTyping: true }
+    Signaling-->>Doctor: chat:user-typing { isTyping: true }
+    Patient->>Cloud: POST /api/v1/chat/:id/attachment (Lab Report PDF)
+    Cloud-->>Patient: { url, mimetype, size }
+    Patient->>Signaling: chat:send { content, attachmentUrl, tempId }
+    Signaling-->>Doctor: chat:new { message }
+    Signaling-->>Patient: chat:new { message (status: DELIVERED) }
+    Doctor->>Signaling: chat:read { appointmentId }
+    Signaling-->>Patient: chat:messages-read (Double Blue Ticks)
+
+    Note over Doctor,Patient: 3. WebRTC P2P Voice & Video Call Handshake
+    Doctor->>Signaling: call:initiate { appointmentId, videoCallingId, callType }
+    Signaling-->>Patient: call:incoming { callId, callerName, callType }
+    Note over Patient: Native Web Audio Synthesizer Plays Ringtone
+    Patient->>Signaling: call:accept { appointmentId, callId }
+    Signaling-->>Doctor: call:accepted { callId }
+    Doctor->>Signaling: webrtc:offer { sdp }
+    Signaling-->>Patient: webrtc:offer { sdp }
+    Patient->>Signaling: webrtc:answer { sdp }
+    Signaling-->>Doctor: webrtc:answer { sdp }
+    Doctor->>Signaling: webrtc:ice-candidate { candidate }
+    Signaling-->>Patient: webrtc:ice-candidate { candidate }
+
+    Note over Doctor,Patient: Direct Encrypted P2P Media Streams (Video, Mic, Screen Share)
+    Doctor<-->>Patient: Direct P2P Media Stream (SRTP / DTLS)
+
+    Note over Doctor,Patient: 4. Call Termination & Audit Trail
+    Doctor->>Signaling: call:end { appointmentId }
+    Signaling-->>Patient: call:ended { durationSec }
+    Note over Doctor,Patient: Audio Beep Plays & Hardware Tracks Stopped
+```
+
+### 🧠 Core Telehealth Engineering Pillars
+
+#### 1. WebRTC Signaling with Race-Condition Free ICE Candidate Queuing
+- **The Problem:** In WebRTC, ICE candidates often arrive at the client *before* the asynchronous `setRemoteDescription` call resolves. Calling `addIceCandidate()` prematurely throws an `InvalidStateError` and drops the media handshake for up to 40% of calls.
+- **Our Solution:** `useWebRtc` implements a deterministic candidate queue (`queuedCandidatesRef`). Out-of-order candidates arriving before remote description completion are buffered safely. Once `setRemoteDescription` successfully resolves, the buffer is flushed and candidates are injected sequentially.
+- **Dual-STUN High Availability:** Dynamic STUN/TURN retrieval from `GET /api/v1/webrtc/ice-servers` with fallback to Google's public STUN pool (`stun.l.google.com:19302`), ensuring connections cross NAT/firewalls seamlessly.
+
+#### 2. WhatsApp / Messenger Real-Time Chat UX
+- **Optimistic UI Delivery:** Messages appear immediately with a `SENDING` clock icon, transitioning to a single tick upon server receipt and double gray ticks upon delivery.
+- **Double Blue Ticks (`chat:messages-read`):** Automatically emits read receipts when the chat viewport is focused, updating sent messages with WhatsApp-style double blue checks.
+- **Debounced Typing Indicator (`chat:user-typing`):** Throttled at 1200ms intervals with auto-expiring 3-second timers to prevent socket congestion.
+- **Live Message Editing & Unsend:** Senders can edit existing messages in-place with an `(edited)` tag or unsend them with real-time propagation across all participant screens.
+
+#### 3. Clinical Screen Sharing & Movable Picture-in-Picture (PiP)
+- **Clinical Screen Sharing:** Enables physicians to share lab test reports, radiology scans, or prescription notes directly via `navigator.mediaDevices.getDisplayMedia({ video: true })` using real-time WebRTC track replacement (`sender.replaceTrack`). Automatically reverts to camera upon user cancellation.
+- **Movable Picture-in-Picture (PiP):** Compact, expandable self-view camera preview in the bottom-right corner with mirror flip and track status overlays.
+
+#### 4. Web Audio API Zero-Latency Sound Synthesizer
+- **Zero Asset Dependency:** Rather than relying on external `.mp3` or `.wav` files that risk 404 network errors or browser blocking, `soundAlerts` synthesizes crisp frequencies in real time using the browser's native `AudioContext`:
+  - **Incoming Message Chime:** 2-tone melodic harmonic cadence (E6 $\to$ G6).
+  - **Incoming Call Ringtone:** Periodic 4-tone ascending ringtone sequence (C5 $\to$ E5 $\to$ G5 $\to$ C6).
+  - **Call Termination Tone:** Soft descending ending cadence (G5 $\to$ C5).
+
+#### 5. Cloudinary Multi-Format Attachment Pipeline with 10MB Guardrail
+- Supports seamless clinical document exchange (PDF diagnostic reports, high-res medical imagery, voice notes).
+- Enforces strict client-side file size guardrails ($\le 10\text{ MB}$) before uploading via `chatService.uploadChatAttachment()`.
+- Built-in lightbox modal for high-resolution image viewing.
+
+#### 6. Device Permission Recovery & Responsive Consultation Layout
+- **Permission Denial Shield (`MediaPermissionModal.tsx`):** Detects browser `NotAllowedError` or missing hardware exceptions and provides step-by-step instructions on enabling camera/mic permissions.
+- **Responsive Split Room:** On desktop, offers a 65/35 split between the video window and real-time chat. On mobile/tablet, offers an interactive tab switch with unread message counters.
 
 ---
 
