@@ -4,26 +4,92 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Activity, Menu, Sparkles } from "lucide-react";
+import { jwtDecode } from "jwt-decode";
 import { Button } from "@/src/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/src/components/ui/sheet";
 
-export function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+interface NavbarProps {
+  initialIsLoggedIn?: boolean;
+  initialUserRole?: string;
+}
+
+export function Navbar({
+  initialIsLoggedIn = false,
+  initialUserRole = "PATIENT",
+}: NavbarProps) {
+  const [isLoggedIn, setIsLoggedIn] = React.useState(initialIsLoggedIn);
+  const [userRole, setUserRole] = React.useState<string>(initialUserRole);
+  const pathname = usePathname();
 
   React.useEffect(() => {
-    // Check if user is logged in by looking for accessToken in localStorage
-    const token = localStorage.getItem("accessToken");
-    setIsLoggedIn(!!token);
+    // 1. Check client localStorage
+    const localToken = localStorage.getItem("accessToken");
 
-    // Optional: Listen for storage events if they login/logout in another tab
+    // 2. Check client document.cookie
+    const cookieMatch =
+      typeof document !== "undefined"
+        ? document.cookie.match(/(?:^|;\s*)accessToken=([^;]+)/)
+        : null;
+    const cookieToken = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
+
+    const token = localToken || cookieToken;
+
+    if (token) {
+      setIsLoggedIn(true);
+
+      // Keep localStorage in sync if cookie exists but localStorage is missing
+      if (!localToken && cookieToken) {
+        try {
+          localStorage.setItem("accessToken", cookieToken);
+        } catch {}
+      }
+
+      try {
+        const decoded: any = jwtDecode(token);
+        if (decoded?.role) {
+          setUserRole(decoded.role.toUpperCase());
+        }
+      } catch {}
+    } else {
+      setIsLoggedIn(initialIsLoggedIn);
+      setUserRole(initialUserRole);
+    }
+
+    // Storage listener across tabs or login/logout events
     const handleStorageChange = () => {
-      setIsLoggedIn(!!localStorage.getItem("accessToken"));
+      const updatedLocal = localStorage.getItem("accessToken");
+      const updatedCookieMatch =
+        typeof document !== "undefined"
+          ? document.cookie.match(/(?:^|;\s*)accessToken=([^;]+)/)
+          : null;
+      const updatedToken =
+        updatedLocal || (updatedCookieMatch ? updatedCookieMatch[1] : null);
+
+      setIsLoggedIn(!!updatedToken);
+      if (updatedToken) {
+        try {
+          const decoded: any = jwtDecode(updatedToken);
+          if (decoded?.role) {
+            setUserRole(decoded.role.toUpperCase());
+          }
+        } catch {}
+      }
     };
+
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+  }, [initialIsLoggedIn, initialUserRole]);
 
-  const pathname = usePathname();
+  const getDashboardHref = () => {
+    const role = userRole?.toUpperCase();
+    if (role === "ADMIN" || role === "SUPER_ADMIN") {
+      return "/admin/dashboard";
+    }
+    if (role === "DOCTOR") {
+      return "/doctor/dashboard";
+    }
+    return "/dashboard";
+  };
 
   const getLinkClasses = (path: string) => {
     // Exact match for Home, startswith for others like /doctors, /doctors/123
@@ -79,7 +145,7 @@ export function Navbar() {
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-4">
           {isLoggedIn ? (
-            <Link href="/dashboard">
+            <Link href={getDashboardHref()}>
               <Button className="rounded-full px-6 shadow-md transition-transform hover:scale-105">
                 Go to Dashboard
               </Button>
@@ -154,7 +220,7 @@ export function Navbar() {
                 </Link>
                 <div className="flex flex-col gap-4 mt-6 border-t pt-6">
                   {isLoggedIn ? (
-                    <Link href="/dashboard" className="w-full">
+                    <Link href={getDashboardHref()} className="w-full">
                       <Button className="w-full justify-center rounded-full">
                         Go to Dashboard
                       </Button>

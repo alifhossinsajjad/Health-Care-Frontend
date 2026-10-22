@@ -119,18 +119,18 @@ export function DataTable<TData, TValue>({
 
       {/* Pagination Controls */}
       {meta && totalPages > 1 && (
-        <div className="flex items-center justify-between px-2">
-          <div className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-3 py-4 pb-20 sm:pb-6 sm:pr-28">
+          <div className="text-sm text-zinc-500 dark:text-zinc-400 font-medium text-center sm:text-left">
             Showing{" "}
-            <span className="text-zinc-900 dark:text-zinc-100">
+            <span className="text-zinc-900 dark:text-zinc-100 font-semibold">
               {(currentPage - 1) * meta.limit + 1}
             </span>{" "}
             to{" "}
-            <span className="text-zinc-900 dark:text-zinc-100">
+            <span className="text-zinc-900 dark:text-zinc-100 font-semibold">
               {Math.min(currentPage * meta.limit, meta.total)}
             </span>{" "}
             of{" "}
-            <span className="text-zinc-900 dark:text-zinc-100">
+            <span className="text-zinc-900 dark:text-zinc-100 font-semibold">
               {meta.total}
             </span>{" "}
             entries
@@ -141,7 +141,7 @@ export function DataTable<TData, TValue>({
               size="sm"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage <= 1}
-              className="rounded-full shadow-sm"
+              className="rounded-full shadow-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
               Previous
@@ -151,7 +151,7 @@ export function DataTable<TData, TValue>({
               size="sm"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage >= totalPages}
-              className="rounded-full shadow-sm"
+              className="rounded-full shadow-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             >
               Next
               <ChevronRight className="h-4 w-4 ml-1" />

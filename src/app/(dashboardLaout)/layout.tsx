@@ -36,7 +36,7 @@ export default async function RootDashboardLayout({
       <div className="flex flex-1 flex-col w-full min-h-screen min-w-0 overflow-hidden">
         <DashboardHeader userRole={userRole} userEmail={userEmail} />
         
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-zinc-50/50 dark:bg-zinc-900/50 p-4 sm:p-6 min-w-0">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-zinc-50/50 dark:bg-zinc-900/50 p-4 sm:p-6 pb-24 sm:pb-28 min-w-0">
           {children}
         </main>
       </div>

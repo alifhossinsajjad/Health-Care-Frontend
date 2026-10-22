@@ -113,7 +113,7 @@ export function ConsultationVideoRoom({
               </p>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-3 mt-8">
+              <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
                 <Button
                   size="lg"
                   onClick={() => onInitiateCall("VIDEO")}
@@ -123,13 +123,12 @@ export function ConsultationVideoRoom({
                 </Button>
 
                 <Button
+                  size="lg"
                   variant="outline"
-                  size="icon"
                   onClick={() => onInitiateCall("AUDIO")}
-                  className="h-12 w-12 rounded-full border-zinc-800 bg-zinc-900 text-zinc-300 hover:text-white hover:bg-zinc-800 shadow-md"
-                  title="Audio-only consultation"
+                  className="rounded-full border-zinc-700/80 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-100 font-bold text-xs sm:text-sm px-5 h-12 gap-2 shadow-md transition-transform active:scale-95"
                 >
-                  <PhoneCall className="h-4 w-4 text-blue-400" />
+                  <PhoneCall className="h-4 w-4 text-blue-400" /> Start Audio Call
                 </Button>
               </div>
             </div>

@@ -38,7 +38,7 @@ export function ScheduleTimeWindowSection({
   let formattedStartTime = "";
   let formattedEndTime = "";
   let isTimeWindowValid = false;
-  let sampleSlotTimes: string[] = [];
+  const sampleSlotTimes: string[] = [];
   let lastSlotTime = "";
 
   if (startTime && endTime) {

@@ -30,8 +30,8 @@ export function AppPagination({ meta }: AppPaginationProps) {
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-between px-2 pt-4 w-full">
-      <div className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-3 py-4 pb-20 sm:pb-6 sm:pr-28 w-full">
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 font-medium text-center sm:text-left">
         Showing{" "}
         <span className="text-zinc-900 dark:text-zinc-100">
           {(currentPage - 1) * meta.limit + 1}
