@@ -1,8 +1,18 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Activity, Phone, Mail, MapPin, ShieldCheck, Heart } from "lucide-react";
 
 export function Footer() {
+  const pathname = usePathname();
+
+  // Hide footer on full-screen AI Assistant workspace
+  if (pathname === "/ai-assistant") {
+    return null;
+  }
+
   return (
     <footer className="border-t border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-600 dark:text-zinc-400">
       <div className="container mx-auto px-4 md:px-6 py-16 max-w-7xl">

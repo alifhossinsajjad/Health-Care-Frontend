@@ -50,8 +50,8 @@ export function AIAssistantFloatingWidget() {
     }
   }, [isOpen, hasNewBadge]);
 
-  // Hide floating widget inside live consultation room to prevent blocking chat/call controls
-  if (pathname?.startsWith("/consultation")) {
+  // Hide floating widget inside live consultation room or when on the dedicated /ai-assistant page
+  if (pathname?.startsWith("/consultation") || pathname === "/ai-assistant") {
     return null;
   }
 
