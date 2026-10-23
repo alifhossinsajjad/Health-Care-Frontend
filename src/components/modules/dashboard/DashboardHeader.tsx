@@ -1,6 +1,7 @@
 import * as React from "react";
 import { SidebarTrigger } from "@/src/components/ui/sidebar";
 import { UserProfileDropdown } from "./UserProfileDropdown";
+import { NotificationBell } from "@/src/components/modules/notifications/NotificationBell";
 
 export function DashboardHeader({ userRole, userEmail }: { userRole?: string; userEmail?: string }) {
   return (
@@ -11,7 +12,8 @@ export function DashboardHeader({ userRole, userEmail }: { userRole?: string; us
         <h2 className="text-lg font-semibold hidden md:block tracking-tight">Dashboard</h2>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        <NotificationBell />
         <UserProfileDropdown initialRole={userRole} initialEmail={userEmail} />
       </div>
     </header>

@@ -132,6 +132,23 @@ class SoundAlertSynthesizer {
   public playCallEndTone() {
     this.triggerTone(783.99, 0, 0.35, 0.18, 523.25);
   }
+
+  /**
+   * Standard in-app notification chime (melodic ascending triad)
+   */
+  public playNotificationChime() {
+    this.triggerTone(698.46, 0, 0.12, 0.18); // F5
+    this.triggerTone(880.0, 0.08, 0.16, 0.2); // A5
+    this.triggerTone(1046.5, 0.16, 0.28, 0.22); // C6
+  }
+
+  /**
+   * Urgent alert double chime for 5-minute reminder & peer waiting in consultation room
+   */
+  public playUrgentAlertChime() {
+    this.triggerTone(1046.5, 0, 0.1, 0.25); // C6 Beep 1
+    this.triggerTone(1318.51, 0.14, 0.22, 0.28); // E6 Beep 2
+  }
 }
 
 export const soundAlerts = new SoundAlertSynthesizer();

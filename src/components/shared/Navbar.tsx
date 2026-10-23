@@ -7,6 +7,7 @@ import { Activity, Menu, Sparkles } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import { Button } from "@/src/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/src/components/ui/sheet";
+import { NotificationBell } from "@/src/components/modules/notifications/NotificationBell";
 
 interface NavbarProps {
   initialIsLoggedIn?: boolean;
@@ -143,13 +144,16 @@ export function Navbar({
         </nav>
 
         {/* Desktop Actions */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-3">
           {isLoggedIn ? (
-            <Link href={getDashboardHref()}>
-              <Button className="rounded-full px-6 shadow-md transition-transform hover:scale-105">
-                Go to Dashboard
-              </Button>
-            </Link>
+            <>
+              <NotificationBell />
+              <Link href={getDashboardHref()}>
+                <Button className="rounded-full px-6 shadow-md transition-transform hover:scale-105">
+                  Go to Dashboard
+                </Button>
+              </Link>
+            </>
           ) : (
             <>
               <Link href="/login">
@@ -167,7 +171,8 @@ export function Navbar({
         </div>
 
         {/* Mobile Menu */}
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-2">
+          {isLoggedIn && <NotificationBell />}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
