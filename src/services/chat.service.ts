@@ -150,7 +150,9 @@ export const chatService = {
       if (!accessToken) return { success: false, message: "Not authenticated" };
 
       const formData = new FormData();
-      formData.append("file", file);
+      const ext = file.type?.includes("mp4") ? "m4a" : file.type?.includes("audio") ? "webm" : "";
+      const defaultName = ext ? `voice-message-${Date.now()}.${ext}` : "attachment";
+      formData.append("file", file, file.name || defaultName);
 
       const res = await fetch(
         `${API_BASE_URL}/chat/${appointmentId}/attachment`,

@@ -371,11 +371,12 @@ Add your service endpoints:
 
 ```env
 # Client-Facing Public API Gateway (Accessible from User's Browser)
-NEXT_PUBLIC_API_BASE_URL=http://localhost/api/v1
-NEXT_PUBLIC_API_URL=http://localhost/api/v1
+NEXT_PUBLIC_API_BASE_URL=your_end_points
+NEXT_PUBLIC_API_URL=your_end_points
+
 
 # Internal Docker Network Service URL (For Server-Side Rendering within Docker Network)
-INTERNAL_API_BASE_URL=http://healthcare_nginx/api/v1
+INTERNAL_API_BASE_URL=your_end_points
 ```
 
 ---

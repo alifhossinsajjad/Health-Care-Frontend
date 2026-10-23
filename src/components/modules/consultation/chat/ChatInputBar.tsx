@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { Send, Paperclip, Edit2, Loader2, Mic, Trash2 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { useVoiceRecorder } from "@/src/hooks/chat/useVoiceRecorder";
+import { ActiveRecordingBar } from "./ActiveRecordingBar";
 
 interface ChatInputBarProps {
   isUploading: boolean;
@@ -34,6 +35,9 @@ export function ChatInputBar({
   const {
     isRecording,
     formattedDuration,
+    volumeLevel,
+    isMicSilent,
+    activeMicLabel,
     errorMessage,
     startRecording,
     stopAndSend,
@@ -95,16 +99,8 @@ export function ChatInputBar({
       {/* Editing Message Banner */}
       {editingMessageId && (
         <div className="px-4 py-2 bg-amber-50 dark:bg-amber-950/50 border-b border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-200 text-xs flex items-center justify-between">
-          <span className="flex items-center gap-1.5 font-medium">
-            <Edit2 className="h-3 w-3" /> Editing message...
-          </span>
-          <button
-            type="button"
-            onClick={onCancelEdit}
-            className="text-amber-600 hover:text-amber-900 dark:hover:text-amber-100 font-semibold"
-          >
-            Cancel
-          </button>
+          <span className="flex items-center gap-1.5 font-medium"><Edit2 className="h-3 w-3" /> Editing message...</span>
+          <button type="button" onClick={onCancelEdit} className="text-amber-600 hover:text-amber-900 dark:hover:text-amber-100 font-semibold">Cancel</button>
         </div>
       )}
 
@@ -117,44 +113,15 @@ export function ChatInputBar({
 
       <div className="p-3">
         {isRecording ? (
-          /* Active Recording State Bar */
-          <div className="flex items-center gap-2 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-xl px-3 py-2 flex-1 animate-in fade-in">
-            <div className="flex items-center gap-2 flex-1">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500" />
-              </span>
-              <span className="text-xs font-semibold text-rose-700 dark:text-rose-300 font-mono">
-                Recording Voice Note... {formattedDuration}
-              </span>
-            </div>
-
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={cancelRecording}
-              className="h-8 px-2 text-xs text-zinc-600 hover:text-rose-600 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg gap-1"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              <span>Cancel</span>
-            </Button>
-
-            <Button
-              type="button"
-              size="sm"
-              disabled={isUploading}
-              onClick={stopAndSend}
-              className="h-8 px-3 text-xs bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs gap-1"
-            >
-              {isUploading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Send className="h-3.5 w-3.5" />
-              )}
-              <span>Send Voice</span>
-            </Button>
-          </div>
+          <ActiveRecordingBar
+            formattedDuration={formattedDuration}
+            volumeLevel={volumeLevel}
+            isMicSilent={isMicSilent}
+            activeMicLabel={activeMicLabel}
+            isUploading={isUploading}
+            onCancel={cancelRecording}
+            onSend={stopAndSend}
+          />
         ) : (
           /* Standard Input Bar */
           <form onSubmit={handleSubmit} className="flex items-end gap-2">
