@@ -8,6 +8,8 @@
   <img src="https://img.shields.io/badge/WebRTC-P2P_Voice_%26_Video-FF3E00?style=for-the-badge&logo=webrtc&logoColor=white" alt="WebRTC" />
   <img src="https://img.shields.io/badge/Socket.io-Real--Time_Messaging-010101?style=for-the-badge&logo=socket.io&logoColor=white" alt="Socket.io" />
   <img src="https://img.shields.io/badge/Notifications-Hybrid_WS_%2B_HTTP-059669?style=for-the-badge&logo=redis&logoColor=white" alt="Hybrid Notifications" />
+  <img src="https://img.shields.io/badge/AI_Vision-Multimodal_Diagnostic_Analyzer-7928CA?style=for-the-badge&logo=google&logoColor=white" alt="Multimodal AI Vision" />
+  <img src="https://img.shields.io/badge/Prescriptions-Dual--Handshake_eRx-10B981?style=for-the-badge&logo=medscape&logoColor=white" alt="Digital Prescriptions" />
   <img src="https://img.shields.io/badge/Google_Gemini-Applied_AI_&_RAG-8E75C2?style=for-the-badge&logo=googlegemini&logoColor=white" alt="Google Gemini RAG" />
   <img src="https://img.shields.io/badge/Server--Sent_Events-Live_Token_Streaming-FF6B6B?style=for-the-badge&logo=fastapi&logoColor=white" alt="SSE Streaming" />
   <img src="https://img.shields.io/badge/Docker-Standalone_Container-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
@@ -343,6 +345,128 @@ Synthesizes crisp frequencies in real time using the browser's native `AudioCont
 
 ---
 
+## 🔬 Enterprise Multimodal AI Lab Report Vision & Biomarker Analysis Architecture
+
+Our platform incorporates a **Clinical Multimodal Vision Analyzer (`/dashboard/my-lab-reports`)** designed to parse complex diagnostic documents (Complete Blood Count / CBC, Lipid Panels, Liver Function Tests / LFT, Renal Function, Urinalysis, and Pathology reports) uploaded as PDFs or high-resolution images. It bridges patient understanding with physician review through deterministic biomarker normalization and live in-consultation drawers.
+
+```mermaid
+flowchart TD
+    PatientDoc["Patient or Doctor"] --> Upload["Upload Diagnostic Report<br/>(PDF, JPG, PNG, WebP up to 10MB)"]
+    Upload --> VisionService["labReportService.analyzeReport()<br/>POST /api/v1/lab-reports/analyze"]
+    VisionService --> AICluster["Multimodal Vision Analyzer Cluster<br/>(Visual Extraction + Structured JSON Parsing)"]
+    
+    subgraph ExtractionEngine["Multimodal Diagnostic Engine"]
+        AICluster --> Biomarkers["Biomarker Metrics Normalizer<br/>(Hemoglobin, Glucose, Cholesterol, Platelets, etc.)"]
+        AICluster --> ClinicalSummary["Executive Clinical Summary & Patient Directives"]
+        AICluster --> Questions["Doctor Consultation Prompt Questions"]
+        AICluster --> SafetyRating["Abnormality Severity Index (Low, Normal, Elevated, Critical)"]
+    end
+    
+    subgraph PresentationPortal["Clinical Visualization & In-Room Collaboration"]
+        Biomarkers --> StatusBadge["Biomarker Badge Matrix<br/>• Green (Optimal / Normal)<br/>• Amber (Elevated / Low)<br/>• Crimson Pulsing (Critical Alert)"]
+        ClinicalSummary --> DetailModal["LabReportDetailModal<br/>(Full Metric Table + Reference Ranges)"]
+        PatientDoc --> AppLink["LinkReportToAppointmentModal<br/>(Bind Report directly to Active Consultation)"]
+        AppLink --> InRoomDrawer["ConsultationLabReportsDrawer<br/>(Live In-Call Split View during Video Consultation)"]
+    end
+```
+
+### 🧠 Core Lab Report Engineering Pillars
+
+#### 1. Multimodal Document Extraction & Normalization
+- **Universal Formats:** Accepts camera photos, scanned JPG/PNGs, and clinical PDFs ($\le 10\text{ MB}$).
+- **Structured JSON Schema:** Standardizes disparate laboratory report formats across diagnostic centers into unified medical records containing:
+  - `reportName` & `testDate`: Auto-detected laboratory category and sample collection date.
+  - `metrics`: Array of parsed biomarkers, numerical values, measurement units (e.g. `mg/dL`, `g/dL`, `10^3/uL`), reference ranges, and clinical interpretation status.
+  - `summary`: Plain-language executive summary highlighting significant diagnostic findings.
+  - `questionsForDoctor`: Actionable, intelligent questions generated to empower patients during physician consultation.
+
+#### 2. Visual Biomarker Classification Matrix
+Each biomarker metric is dynamically tagged with an appropriate clinical risk level:
+- **Optimal / Normal (Emerald Badge):** Metric falls squarely within expected healthy physiological limits.
+- **Low / Borderline (Blue Badge):** Parameter below minimum healthy reference thresholds.
+- **Elevated / High (Amber Badge):** Elevated values warranting clinical review or dietary adjustment.
+- **Critical Abnormality (Pulsing Crimson Badge):** Out-of-bounds metrics flagged with animated attention indicators.
+
+#### 3. In-Consultation Live Collaboration Drawer (`ConsultationLabReportsDrawer.tsx`)
+- In telemedicine sessions, having the doctor fumble through external tabs or ask the patient to re-send files wastes critical consultation minutes.
+- The **Lab Reports Drawer** sits natively within the WebRTC Consultation Room (`/consultation/[id]`).
+- Accessible via the **`[Lab Reports & AI]`** topbar button, it renders all patient diagnostic records side-by-side with the active video call and chat stream, allowing instant review of vital trends and historical biomarkers without navigating away.
+
+#### 4. One-Click Consultation Association (`LinkReportToAppointmentModal.tsx`)
+- Patients can link specific lab reports directly to an upcoming or active appointment.
+- Automatically associates the diagnostic file with the assigned physician, providing zero-latency record access upon joining the consultation room.
+
+---
+
+## 📋 Digital e-Prescription Engine & Dual-Handshake Consultation Lifecycle
+
+In clinical telehealth, **leaving a video call (`Leave Room`)** and **officially concluding medical consultation (`Complete Consultation`)** are fundamentally decoupled. Our platform implements an enterprise **e-Prescription Generation Pipeline** coupled with a **Mutual Doctor-Patient Closure Handshake**.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Doctor as Doctor Client
+    participant Socket as Live Call Room (Socket.io)
+    actor Patient as Patient Client
+    participant Backend as Backend API & Cloudinary
+
+    Note over Doctor,Patient: 1. In-Consultation Prescription Issuance
+    Doctor->>Doctor: Clicks [Prescription] -> Writes Rx & Follow-up Date
+    Doctor->>Backend: POST /api/v1/prescriptions
+    Backend->>Backend: Generates Official PDF & Uploads to Cloudinary
+    Backend->>Patient: Emails PDF Attachment & Updates Records
+    Backend->>Socket: Emit "prescription:issued"
+    Socket-->>Patient: Toast: "Dr. has issued your prescription! You can discuss it now."
+    Note over Doctor,Patient: Call remains active! Doctor & Patient discuss dosage & instructions.
+
+    Note over Doctor,Patient: 2. Mutual Consultation Closure Handshake
+    Doctor->>Doctor: Clicks [End Consultation] -> [Request Patient Confirmation]
+    Doctor->>Socket: Emit End Request Signal
+    Socket-->>Patient: Modal Pops Up: "Doctor requested to end consultation"
+    alt Patient has more questions
+        Patient->>Socket: Clicks [I Have Questions]
+        Socket-->>Doctor: Alert: "Patient has more questions. Consultation continues."
+        Note over Doctor,Patient: Consultation continues uninterrupted!
+    else Patient confirms conclusion
+        Patient->>Socket: Clicks [Yes, End Consultation]
+        Socket-->>Doctor: Signal: "consultation:end_confirmed"
+        Doctor->>Backend: PATCH /api/v1/appointments/change-appointment-status/:id { status: "COMPLETED" }
+        Backend->>Socket: Emit "consultation:completed"
+        Socket-->>Doctor: Both sessions disconnect safely
+        Socket-->>Patient: Both sessions disconnect safely
+        Doctor->>Doctor: Redirects to /doctor/dashboard/appointments
+        Patient->>Patient: Redirects to /dashboard/my-prescriptions (Download PDF)
+    end
+```
+
+### 🧠 Core Prescription & Handshake Engineering Pillars
+
+#### 1. Why "Leave Room" is Decoupled from "Complete Consultation"
+- **The Problem:** In poor network conditions, a participant's browser tab might refresh, Wi-Fi might drop, or a doctor may temporarily step away to inspect an external lab scan. If disconnecting automatically terminated the appointment as `COMPLETED`, neither party could ever re-enter the room due to enterprise security rules.
+- **The Solution:** 
+  - **`Leave Room` (Gray Outline Button):** Closes the WebRTC media tracks and returns to the dashboard, keeping the appointment status as `INPROGRESS`. Either party can click **`Rejoin Consultation`** at any point during the scheduled slot.
+  - **`End Consultation` (Green Action Button):** Only available to the attending doctor, initiating the official conclusion handshake.
+
+#### 2. In-Call e-Prescription Issuance (`CreatePrescriptionModal.tsx`)
+- Physicians can write and issue official clinical prescriptions directly inside the active video consultation room.
+- Captures clinical advice, medication instructions, and an optional next follow-up date.
+- **Session Preservation:** Issuing the prescription **does not terminate the call**. Instead, both doctor and patient remain in the room to discuss dosage, administration schedule, and potential side effects.
+- **Automated PDF Delivery:** The backend synthesizes an official prescription PDF, uploads it to certified Cloudinary storage, and emails a transactional copy with PDF attachment to the patient.
+
+#### 3. Mutual End-Consultation Handshake (`PatientEndConsultationModal.tsx`)
+- To ensure patient satisfaction, clicking **"End Consultation"** prompts the doctor to request patient confirmation.
+- The patient receives an immediate modal alert: *"Dr. [Name] has finished the consultation and requested to end the session. Do you have any further questions, or are you ready to finish?"*
+  - **"I Have Questions":** Alerts the doctor that further discussion is requested; the consultation continues without interruption.
+  - **"Yes, End Consultation":** Confirms completion, triggering the doctor client to execute `PATCH /api/v1/appointments/change-appointment-status/:id` with `{ status: "COMPLETED" }`.
+- **Doctor Override:** Includes a **"Force Complete Session"** option in case the patient disconnects or becomes unresponsive.
+
+#### 4. Dedicated Patient, Doctor & Admin Portals
+- **Patient Prescriptions Portal (`/dashboard/my-prescriptions`):** Searchable archive of all digital prescriptions with doctor metadata, follow-up date badges, full advice modal (`PrescriptionDetailsModal.tsx`), and direct **"Download PDF"** buttons.
+- **Doctor Prescriptions Management (`/doctor/dashboard/prescriptions`):** Full clinical management portal allowing doctors to inspect, update advice (`EditPrescriptionModal.tsx`), delete inaccurate entries, and download records.
+- **Admin System-Wide Audit (`/admin/dashboard/prescriptions-management`):** Institutional oversight portal tracking all issued prescriptions across doctors and patients with compliance search and audit capabilities.
+
+---
+
 ## ✨ Core Features & Architectural Highlights
 
 ### 1. 🌟 High-Conversion Clinical Landing Page
@@ -426,17 +550,29 @@ We are actively expanding this platform into a comprehensive AI-augmented health
   - Intelligent hardware microphone auto-detection bypassing disconnected virtual drivers (iVCam, Camo).
   - Progressive vocal recording with Cloudinary universal MP3 transcode playback.
   - Instant clinical PDF laboratory report and high-resolution diagnostic image sharing with 10MB guardrail.
-- [x] **🔔 Real-Time Hybrid Notification System (HTTP + WebSockets) (Shipped)**
+- [x] **🔔 Real-Time Hybrid Notification System (HTTP + WebSockets) (Shipped in v1.0)**
   - Dual-channel hybrid architecture: pure WebSockets (latency < 10ms) + composite-indexed REST (`[userId, isRead]`).
   - Smart in-room route suppression engine preventing redundant toast popups on active `/consultation/[id]` routes.
   - Triple-variant actionable cards: pulsing green waiting room alert with direct `[Join Room]` CTA, 5-minute urgent countdown, and standard clinical records.
   - Zero-latency native Web Audio API dual-tone sound synthesizer (melodic triad & urgent double beep).
   - Security immediate force logout (`user:blocked`) and automatic reconnect badge reconciliation.
   - Granular notification preferences matrix (sound, in-app, email, and appointment reminder opt-ins).
-- [ ] **📑 OCR Prescription Parser & Diagnostic Lab Integration (Q3 2027)**
-  - Computer-vision OCR to digitize handwritten doctor prescriptions and schedule automated medicine dosage reminders.
-- [ ] **📲 Multi-Channel Notifications (WhatsApp & SMS) (Q3 2027)**
-  - Automated Twilio / WhatsApp Business API notifications for appointment confirmations, 15-minute reminders, and invoice receipts.
+- [x] **🔬 Multimodal AI Lab Report Vision & Biomarker Analysis (Shipped in v1.0)**
+  - Complete PDF & image multimodal vision extraction for CBC, Lipid, Liver Function, Pathology reports.
+  - Color-coded biomarker risk badging (Optimal, Low, Elevated, Critical) with normal reference ranges and numerical units.
+  - Live in-consultation collaboration drawer (`ConsultationLabReportsDrawer`) for side-by-side review during video calls.
+  - Direct appointment linking modal (`LinkReportToAppointmentModal`) for fast physician review.
+- [x] **📋 Digital e-Prescription Engine & Dual-Handshake Lifecycle (Shipped in v1.0)**
+  - In-consultation prescription modal (`CreatePrescriptionModal`) generating Cloudinary official PDFs and transactional emails.
+  - Decoupled `Leave Room` (temporary exit, session stays `INPROGRESS`) from `End Consultation` (official closure).
+  - Mutual doctor-patient confirmation handshake (`PatientEndConsultationModal`): doctor requests end, patient can ask follow-up questions or confirm completion.
+  - Comprehensive dedicated portals for Patients (`/dashboard/my-prescriptions`), Doctors (`/doctor/dashboard/prescriptions`), and Admins (`/admin/dashboard/prescriptions-management`).
+- [ ] **📑 OCR Prescription Parser & Automated Dosage Scheduling (v1.2 Update)**
+  - Computer-vision OCR to digitize external handwritten prescriptions and schedule automated medication reminders.
+- [ ] **📲 Multi-Channel Notifications (WhatsApp & SMS) (v1.2 Update)**
+  - Automated Twilio / WhatsApp Business API transactional alerts for appointment booking, 15-minute reminders, and Cloudinary PDF invoices.
+- [ ] **📈 Longitudinal Health Trends & Biomarker Analytics Charts (v1.2 Update)**
+  - Historical visual charts tracking cholesterol, HbA1c, and hemoglobin trends across consecutive lab reports over time.
 
 ---
 

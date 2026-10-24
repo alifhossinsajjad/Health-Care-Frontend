@@ -176,16 +176,16 @@ export default async function DoctorAppointmentsPage() {
                     </span>
                   </div>
 
-                  {appt.videoCallingId && isScheduled && (
+                  {appt.videoCallingId && (isScheduled || appt.status === "INPROGRESS") && (
                     <JoinConsultationButton
                       appointmentId={appt.id}
                       isPaid={
                         appt.paymentStatus === "PAID" ||
                         appt.payment?.status === "PAID"
                       }
-                      isScheduled={isScheduled}
+                      status={appt.status}
+                      endDateTime={schedule?.endDateTime}
                       userRole="DOCTOR"
-                      label="Join Consultation"
                     />
                   )}
                 </div>

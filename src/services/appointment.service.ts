@@ -234,3 +234,56 @@ export const getMySingleAppointment = async (
     };
   }
 };
+
+export const changeAppointmentStatus = async (
+  appointmentId: string,
+  status: "COMPLETED" | "SCHEDULED" | "INPROGRESS" | "CANCELED"
+): Promise<{
+  success: boolean;
+  message?: string;
+  data?: IAppointment;
+}> => {
+  try {
+    const accessToken = await getAuthToken();
+
+    if (!accessToken) {
+      return {
+        success: false,
+        message: "You must be authenticated to update consultation status.",
+      };
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/appointments/change-appointment-status/${appointmentId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ status }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      return {
+        success: false,
+        message: data.message || "Failed to update consultation status",
+      };
+    }
+
+    return {
+      success: true,
+      message: data.message || "Consultation status updated successfully",
+      data: data.data,
+    };
+  } catch (error: any) {
+    console.error("Change Appointment Status Error:", error);
+    return {
+      success: false,
+      message: error?.message || "Internal server error updating consultation status",
+    };
+  }
+};

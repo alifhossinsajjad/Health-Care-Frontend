@@ -1,16 +1,15 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import {
   ArrowLeft,
   Clock,
   Wifi,
   PhoneCall,
-  Video,
   ShieldCheck,
-  User,
   Activity,
+  CheckCircle,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
@@ -26,6 +25,10 @@ interface ConsultationTopBarProps {
   isPeerOnline: boolean;
   onExit: () => void;
   onOpenLabReports?: () => void;
+  isDoctor?: boolean;
+  onCompleteConsultation?: () => void;
+  isCompleting?: boolean;
+  onOpenPrescription?: () => void;
 }
 
 export function ConsultationTopBar({
@@ -38,6 +41,10 @@ export function ConsultationTopBar({
   isPeerOnline,
   onExit,
   onOpenLabReports,
+  isDoctor = false,
+  onCompleteConsultation,
+  isCompleting = false,
+  onOpenPrescription,
 }: ConsultationTopBarProps) {
   const isCallActive = callState === "CONNECTED";
 
@@ -136,11 +143,39 @@ export function ConsultationTopBar({
           </Button>
         )}
 
+        {/* Write Digital Prescription (Doctor Only) */}
+        {isDoctor && onOpenPrescription && (
+          <Button
+            size="sm"
+            onClick={onOpenPrescription}
+            className="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs gap-1.5 shadow-sm transition-all"
+            title="Write and issue official prescription"
+          >
+            <FileText className="h-4 w-4" />
+            <span className="hidden sm:inline">Prescription</span>
+          </Button>
+        )}
+
+        {/* End & Complete Consultation (Doctor Only) */}
+        {isDoctor && onCompleteConsultation && (
+          <Button
+            size="sm"
+            disabled={isCompleting}
+            onClick={onCompleteConsultation}
+            className="h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs gap-1.5 shadow-sm transition-all"
+            title="Officially end and complete consultation"
+          >
+            <CheckCircle className="h-4 w-4" />
+            <span>{isCompleting ? "Completing..." : "End Consultation"}</span>
+          </Button>
+        )}
+
         <Button
           variant="outline"
           size="sm"
           onClick={onExit}
-          className="h-9 px-3.5 rounded-xl border-zinc-200 dark:border-zinc-800 text-xs font-semibold hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40 transition-colors"
+          className="h-9 px-3.5 rounded-xl border-zinc-200 dark:border-zinc-800 text-xs font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-600 dark:text-zinc-300"
+          title="Temporarily leave room (consultation remains in-progress)"
         >
           Leave Room
         </Button>

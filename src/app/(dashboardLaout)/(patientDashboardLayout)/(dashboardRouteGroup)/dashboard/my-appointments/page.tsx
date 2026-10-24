@@ -240,13 +240,13 @@ export default async function MyAppointmentsPage({
                       )}
 
                       {/* Video Call Button (Guarded by payment confirmation) */}
-                      {appt.videoCallingId && isScheduled ? (
+                      {appt.videoCallingId && (isScheduled || appt.status === "INPROGRESS") ? (
                         <JoinConsultationButton
                           appointmentId={appt.id}
                           isPaid={isPaid}
-                          isScheduled={isScheduled}
+                          status={appt.status}
+                          endDateTime={schedule?.endDateTime}
                           userRole="PATIENT"
-                          label="Join Video Call"
                         />
                       ) : (
                         <Link href={`/doctors/${appt.doctorId}`}>

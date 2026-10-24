@@ -40,12 +40,14 @@ export const useChatMessages = ({
     try {
       const res = await chatService.getChatHistory(appointmentId, 1, 100);
       if (res.success && Array.isArray(res.data)) {
-        const normalized: IChatMessage[] = res.data.map((m: any) => ({
-          ...m,
-          id: m.id || m._id || `msg-${Date.now()}`,
-          content: m.content || m.message || "",
-          status: m.isRead ? "READ" : "DELIVERED",
-        }));
+        const normalized: IChatMessage[] = res.data
+          .filter((m: any) => !String(m.content || m.message || "").startsWith("__CONSULTATION_"))
+          .map((m: any) => ({
+            ...m,
+            id: m.id || m._id || `msg-${Date.now()}`,
+            content: m.content || m.message || "",
+            status: m.isRead ? "READ" : "DELIVERED",
+          }));
         setMessages(normalized);
       }
     } catch (err) {
@@ -79,6 +81,9 @@ export const useChatMessages = ({
     const handleInboundMessage = (data: any) => {
       const raw = data?.message && typeof data.message === "object" ? data.message : data;
       const textContent = raw?.message || raw?.content || "";
+      if (typeof textContent === "string" && textContent.startsWith("__CONSULTATION_")) {
+        return;
+      }
       const senderObj = raw?.sender || {
         id: raw?.senderId || "",
         name: raw?.senderName || (raw?.senderRole === "DOCTOR" ? "Doctor" : "Patient"),
