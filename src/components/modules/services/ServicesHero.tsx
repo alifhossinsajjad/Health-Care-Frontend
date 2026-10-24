@@ -28,7 +28,7 @@ export function ServicesHero() {
 
         {/* Subtitle */}
         <p className="mt-5 text-sm sm:text-base md:text-lg text-zinc-600 dark:text-zinc-300 max-w-2xl mx-auto leading-relaxed">
-          From real-time Google Gemini AI triage to encrypted WebRTC HD video consultations, instant voice notes, and zero-conflict schedule locking—discover the full clinical ecosystem.
+          From real-time intelligent AI symptom triage to encrypted WebRTC HD video consultations, instant voice notes, and zero-conflict schedule locking—discover the full clinical ecosystem.
         </p>
 
         {/* Action CTAs */}

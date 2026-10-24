@@ -18,6 +18,7 @@ import {
   Terminal,
   Layers,
   Bot,
+  Microscope,
   LucideIcon,
 } from "lucide-react";
 
@@ -207,6 +208,11 @@ export const patientNavItems: NavSection[] = [
   {
     title: "Medical Records",
     items: [
+      {
+        title: "AI Lab Reports",
+        href: "/dashboard/my-lab-reports",
+        icon: Microscope,
+      },
       {
         title: "My Prescriptions",
         href: "/dashboard/my-prescriptions",

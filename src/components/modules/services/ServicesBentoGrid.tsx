@@ -20,7 +20,7 @@ const SERVICES = [
     badge: "Applied AI & RAG",
     title: "AI Clinical Triage & Symptom Checker",
     description:
-      "Sub-300ms Server-Sent Events token streaming powered by Google Gemini and 768-D PostgreSQL pgvector. Deterministic Rule-0 detects acute emergencies with instant 999 hotline routing.",
+      "Sub-300ms Server-Sent Events token streaming powered by our fine-tuned Clinical LLM and 768-D PostgreSQL pgvector. Deterministic Rule-0 detects acute emergencies with instant 999 hotline routing.",
     icon: <Sparkles className="h-6 w-6 text-purple-500" />,
     gradient: "from-purple-500/10 to-indigo-500/10",
     border: "hover:border-purple-500/50",

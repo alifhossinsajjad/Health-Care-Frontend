@@ -16,7 +16,7 @@
 export type AIChatRole = "user" | "model" | "system";
 
 /**
- * Format expected by Gemini / LLM multi-turn chat history
+ * Format expected by LLM multi-turn chat history
  */
 export interface IAIChatHistoryItem {
   role: "user" | "model";

@@ -10,6 +10,7 @@ import {
   Video,
   ShieldCheck,
   User,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
@@ -24,6 +25,7 @@ interface ConsultationTopBarProps {
   formattedDuration: string;
   isPeerOnline: boolean;
   onExit: () => void;
+  onOpenLabReports?: () => void;
 }
 
 export function ConsultationTopBar({
@@ -35,6 +37,7 @@ export function ConsultationTopBar({
   formattedDuration,
   isPeerOnline,
   onExit,
+  onOpenLabReports,
 }: ConsultationTopBarProps) {
   const isCallActive = callState === "CONNECTED";
 
@@ -118,8 +121,21 @@ export function ConsultationTopBar({
         )}
       </div>
 
-      {/* 3. Right: Exit Button */}
+      {/* 3. Right: Lab Reports Drawer & Exit Button */}
       <div className="flex items-center gap-2">
+        {onOpenLabReports && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onOpenLabReports}
+            className="h-9 px-3 rounded-xl border-blue-200 dark:border-blue-900 bg-blue-50/70 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-xs font-semibold hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors gap-1.5"
+            title="Open AI Lab Reports & Biomarkers"
+          >
+            <Activity className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+            <span className="hidden sm:inline">Lab Reports & AI</span>
+          </Button>
+        )}
+
         <Button
           variant="outline"
           size="sm"

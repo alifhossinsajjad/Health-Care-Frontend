@@ -10,6 +10,7 @@ import {
   IAIChatHistoryItem,
   IAIHoldSlotResult,
 } from "@/src/types/ai.type";
+import { sanitizeAiErrorMessage } from "@/src/utils/aiErrorSanitizer";
 
 export interface UseAIChatStreamReturn {
   activeSessionId: string;
@@ -142,7 +143,7 @@ export function useAIChatStream(): UseAIChatStreamReturn {
           updateAiMessage(aiMessageId, {
             text: accumulatedText || "Issue encountered.",
             isStreaming: false,
-            error: errMessage,
+            error: sanitizeAiErrorMessage(errMessage),
           });
         },
       });

@@ -41,7 +41,7 @@ const STARTER_PROMPTS = [
 export function AIChatWelcomeHero({ onSelectPrompt }: AIChatWelcomeHeroProps) {
   return (
     <div className="flex flex-col items-center justify-center my-auto py-2 sm:py-4 px-4 max-w-3xl mx-auto text-center select-none animate-in fade-in zoom-in-95 duration-300">
-      {/* 1. Radiant Glowing Gemini-Style Badge */}
+      {/* 1. Radiant Glowing Medical AI Badge */}
       <div className="relative mb-3">
         <span className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 opacity-40 blur-lg animate-pulse" />
         <div className="relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/25">

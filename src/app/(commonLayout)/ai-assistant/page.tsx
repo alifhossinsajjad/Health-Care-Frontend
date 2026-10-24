@@ -5,7 +5,7 @@ import { AIChatContainer } from "@/src/components/modules/ai-assistant/AIChatCon
 export const metadata: Metadata = {
   title: "AI Clinical Health Assistant & Medical Triage | HealthCare",
   description:
-    "Real-time AI-powered symptom checker, specialist recommendation engine, and clinical doctor booking triage powered by Google Gemini RAG.",
+    "Real-time AI-powered symptom checker, specialist recommendation engine, and clinical doctor booking triage powered by intelligent clinical RAG.",
 };
 
 export default function AIAssistantPage() {

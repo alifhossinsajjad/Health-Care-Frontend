@@ -17,7 +17,7 @@ const FAQS = [
     a: "Immediately after your consultation, your doctor submits the signed electronic prescription. It is automatically available under Dashboard > My Prescriptions with certified Cloudinary PDF download and official verification QR code.",
   },
   {
-    q: "How does the Google Gemini Clinical AI Triage protect medical safety?",
+    q: "How does the Clinical AI Triage protect medical safety?",
     a: "Our AI assistant uses Retrieval-Augmented Generation (RAG) referencing verified clinical documents and hospital doctors. It enforces deterministic Rule-0 emergency checks: if life-threatening symptoms (stroke, heart attack, severe dyspnea) are flagged, it overrides text with a direct 999 hotline action.",
   },
   {

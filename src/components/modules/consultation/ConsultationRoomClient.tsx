@@ -11,6 +11,7 @@ import { ConsultationVideoRoom } from "./ConsultationVideoRoom";
 import { ConsultationChatPanel } from "./ConsultationChatPanel";
 import { IncomingCallModal } from "./IncomingCallModal";
 import { MediaPermissionModal } from "./MediaPermissionModal";
+import { ConsultationLabReportsDrawer } from "@/src/components/modules/labReport/ConsultationLabReportsDrawer";
 
 interface ConsultationRoomClientProps {
   appointment: IAppointment;
@@ -27,6 +28,7 @@ export function ConsultationRoomClient({
 }: ConsultationRoomClientProps) {
   const router = useRouter();
   const [mobileActiveTab, setMobileActiveTab] = useState<"video" | "chat">("video");
+  const [isLabReportsOpen, setIsLabReportsOpen] = useState(false);
 
   // Determine partner profile based on current role and ID matching
   const isDoctor =
@@ -118,6 +120,7 @@ export function ConsultationRoomClient({
         formattedDuration={formattedDuration}
         isPeerOnline={isPeerOnline}
         onExit={handleExit}
+        onOpenLabReports={() => setIsLabReportsOpen(true)}
       />
 
       {/* 2. Mobile Responsive Tab Switcher (Visible on < lg screens) */}
@@ -219,6 +222,12 @@ export function ConsultationRoomClient({
           setPermissionError(null);
           initiateCall(activeCallType);
         }}
+      />
+
+      <ConsultationLabReportsDrawer
+        appointmentId={appointment.id}
+        isOpen={isLabReportsOpen}
+        onClose={() => setIsLabReportsOpen(false)}
       />
     </div>
   );
