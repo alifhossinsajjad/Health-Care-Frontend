@@ -6,7 +6,6 @@ pipeline {
         IMAGE_NAME               = 'healthcare-frontend'
         IMAGE_TAG                = 'latest'
         PORT                     = '3000'
-        NODE_ENV                 = 'production'
         NEXT_TELEMETRY_DISABLED  = '1'
         NEXT_PUBLIC_API_BASE_URL = 'http://localhost/api/v1'
         INTERNAL_API_BASE_URL    = 'http://healthcare_nginx/api/v1'
@@ -44,11 +43,11 @@ pipeline {
 
         stage('2. Install Dependencies') {
             steps {
-                echo '📦 [NPM] Installing frontend dependencies...'
+                echo '📦 [NPM] Installing frontend dependencies (including devDependencies)...'
                 sh '''
                     echo "Node version: $(node -v)"
                     echo "NPM version: $(npm -v)"
-                    npm install --legacy-peer-deps
+                    npm install --legacy-peer-deps --include=dev
                 '''
             }
         }
