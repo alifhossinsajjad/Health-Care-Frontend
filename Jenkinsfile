@@ -28,8 +28,8 @@ pipeline {
                     echo "🌿 Detected Branch from SCM: ${rawBranch}"
                     echo "🔖 Git Commit SHA: ${env.GIT_COMMIT ?: 'local'}"
 
-                    // Intelligent check: Does the target commit exist on origin/main?
-                    def isMainCommit = (sh(script: "git branch -r --contains HEAD | grep -E 'origin/main|origin/master'", returnStatus: true) == 0)
+                    // Intelligent check: Does rawBranch or commit belong to origin/main?
+                    def isMainCommit = (rawBranch.contains('main') || rawBranch.contains('master') || (sh(script: "git branch -r --contains HEAD 2>/dev/null | grep -E 'origin/main|origin/master'", returnStatus: true) == 0))
                     if (isMainCommit) {
                         echo "🎯 Target Commit is verified on origin/main. Activating Production Deployment (CD)!"
                         env.IS_PRODUCTION = 'true'
