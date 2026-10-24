@@ -1,3 +1,5 @@
+name: healthcare-frontend
+
 services:
   frontend:
     build:

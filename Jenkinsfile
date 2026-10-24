@@ -116,7 +116,9 @@ pipeline {
                             cp .env.example .env
                         fi
                     fi
-                    docker compose up -d --build --remove-orphans
+                    docker rm -f healthcare_frontend 2>/dev/null || true
+                    docker compose down --remove-orphans 2>/dev/null || true
+                    docker compose up -d --remove-orphans
                     echo "⏳ Waiting 10 seconds for Next.js standalone server initialization..."
                     sleep 10
                     docker compose ps
