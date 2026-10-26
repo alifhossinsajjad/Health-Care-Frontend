@@ -123,6 +123,16 @@ pipeline {
                     sleep 10
                     docker compose ps
                 '''
+
+                echo '☁️  [Deploy - 2/2] Updating Next.js Frontend on Azure Cloud VPS via SSH...'
+                sh '''
+                    ssh -o StrictHostKeyChecking=no -i /var/jenkins_home/.ssh/healthcare-server_key.pem azureuser@104.214.178.218 "
+                        cd /home/azureuser/Health-Care-Frontend &&
+                        git pull origin main &&
+                        docker compose up -d --build --remove-orphans &&
+                        echo '✅ Azure Cloud VPS Frontend Updated Successfully!'
+                    "
+                '''
             }
         }
     }
