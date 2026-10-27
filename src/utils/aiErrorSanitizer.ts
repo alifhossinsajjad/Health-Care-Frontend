@@ -67,7 +67,7 @@ export function sanitizeAiErrorMessage(rawError: unknown): string {
   if (errorStr.trim().startsWith("{") || errorStr.includes('{"error"')) {
     try {
       const parsed = JSON.parse(
-        errorStr.slice(errorStr.indexOf("{"), errorStr.lastIndexOf("}") + 1)
+        errorStr.slice(errorStr.indexOf("{"), errorStr.lastIndexOf("}") + 1),
       );
       if (parsed?.error?.message) {
         return sanitizeAiErrorMessage(parsed.error.message);
